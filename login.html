@@ -244,7 +244,7 @@
             sendBtn.textContent = 'Sending...';
             
             try {
-                const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+                const response = await fetch('https://api.aicodestreams.com/auth/send-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone: phoneNumber })
@@ -289,7 +289,7 @@
             verifyBtn.textContent = 'Verifying...';
             
             try {
-                const response = await fetch('http://localhost:3001/api/auth/verify-otp', {
+                const response = await fetch('https://api.aicodestreams.com/auth/verify-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone: phoneNumber, otp })
@@ -331,7 +331,7 @@
             this.textContent = 'Sending...';
             
             try {
-                const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+                const response = await fetch('https://api.aicodestreams.com/auth/send-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone: phoneNumber })
