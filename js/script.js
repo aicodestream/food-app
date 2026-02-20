@@ -585,3 +585,180 @@ function logout() {
         window.location.href = 'index.html';
     }
 }
+
+
+// Scroll reveal animation
+function setupScrollReveal() {
+    const revealElements = document.querySelectorAll('.menu-card, .category');
+    
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('active');
+                }, index * 50); // Stagger animation
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+    
+    revealElements.forEach(el => {
+        el.classList.add('reveal');
+        revealObserver.observe(el);
+    });
+}
+
+// Cart badge bounce animation
+function animateCartBadge() {
+    const cartCount = document.getElementById('cart-count');
+    if (cartCount) {
+        cartCount.classList.remove('bounce');
+        void cartCount.offsetWidth; // Trigger reflow
+        cartCount.classList.add('bounce');
+        setTimeout(() => cartCount.classList.remove('bounce'), 500);
+    }
+}
+
+// Enhanced add to cart with feedback
+function enhancedAddToCart(button, item) {
+    // Add visual feedback
+    button.classList.add('added');
+    button.textContent = 'Added!';
+    
+    // Animate cart badge
+    animateCartBadge();
+    
+    // Show toast notification
+    showToast(`${item.name} added to cart`);
+    
+    // Reset button after delay
+    setTimeout(() => {
+        button.classList.remove('added');
+        const lang = getCurrentLanguage();
+        button.textContent = lang === 'mr' ? 'कार्टमध्ये घाला' : 'Add to Cart';
+    }, 1500);
+}
+
+// Toast notification
+function showToast(message, duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = 'notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Remove after duration
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// Header scroll effect
+function setupHeaderScroll() {
+    const header = document.querySelector('header');
+    let lastScroll = 0;
+    
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll > 100) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        
+        lastScroll = currentScroll;
+    });
+}
+
+// Modal accessibility improvements
+function setupModalAccessibility() {
+    const modals = document.querySelectorAll('.modal');
+    
+    modals.forEach(modal => {
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        
+        // Trap focus within modal
+        modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal(modal);
+            }
+            
+            if (e.key === 'Tab') {
+                trapFocus(modal, e);
+            }
+        });
+    });
+}
+
+// Trap focus within element
+function trapFocus(element, event) {
+    const focusableElements = element.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    
+    if (event.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+            lastFocusable.focus();
+            event.preventDefault();
+        }
+    } else {
+        if (document.activeElement === lastFocusable) {
+            firstFocusable.focus();
+            event.preventDefault();
+        }
+    }
+}
+
+// Close modal helper
+function closeModal(modal) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Enhanced modal open
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // Focus first input
+        const firstInput = modal.querySelector('input, textarea, button');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+    }
+}
+
+// Initialize all enhancements
+function initializeEnhancements() {
+    setupScrollReveal();
+    setupHeaderScroll();
+    setupModalAccessibility();
+    
+    // Respect reduced motion preference
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.style.setProperty('--transition-fast', '0ms');
+        document.documentElement.style.setProperty('--transition-base', '0ms');
+        document.documentElement.style.setProperty('--transition-slow', '0ms');
+    }
+}
+
+// Call initialization
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeEnhancements);
+} else {
+    initializeEnhancements();
+}
