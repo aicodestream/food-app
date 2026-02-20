@@ -5,7 +5,10 @@ const client = new DynamoDBClient({});
 const dynamodb = DynamoDBDocumentClient.from(client);
 
 exports.handler = async (event) => {
+  console.log('Event:', JSON.stringify(event, null, 2));
   const httpMethod = event.httpMethod || event.requestContext?.http?.method;
+  console.log('HTTP Method:', httpMethod);
+  console.log('Query Parameters:', event.queryStringParameters);
   
   // Handle OPTIONS for CORS
   if (httpMethod === 'OPTIONS') {

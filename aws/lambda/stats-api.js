@@ -45,7 +45,8 @@ exports.handler = async (event) => {
       const stats = {
         total_orders: filteredOrders.length,
         total_revenue: filteredOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
-        avg_order_value: filteredOrders.length ? filteredOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0) / filteredOrders.length : 0,
+        average_order_value: filteredOrders.length ? filteredOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0) / filteredOrders.length : 0,
+        unique_customers: new Set(filteredOrders.map(o => o.customerPhone)).size,
         orders_by_status: {
           pending: filteredOrders.filter(o => o.status === 'Pending').length,
           preparing: filteredOrders.filter(o => o.status === 'Preparing').length,

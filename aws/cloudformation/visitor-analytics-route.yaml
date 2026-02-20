@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Add GET route for visitor analytics'
+
+Parameters:
+  ApiId:
+    Type: String
+    Description: API Gateway ID
+    Default: 'ewbzhkjb20'
+
+Resources:
+  # GET /visitor-tracking route
+  VisitorTrackingGetRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiId
+      RouteKey: 'GET /visitor-tracking'
+      Target: !Sub 'integrations/${VisitorTrackingGetIntegration}'
+      AuthorizationType: NONE
+
+  VisitorTrackingGetIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiId
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:food-ordering-visitor-tracking/invocations'
+      PayloadFormatVersion: '2.0'
+
+  # Lambda permission for GET
+  VisitorTrackingGetPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: food-ordering-visitor-tracking
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiId}/*/*/visitor-tracking'
+
+Outputs:
+  VisitorTrackingGetRoute:
+    Description: GET route for visitor analytics
+    Value: !Ref VisitorTrackingGetRoute
+  ApiEndpoint:
+    Description: API endpoint URL
+    Value: !Sub 'https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/visitor-tracking'
