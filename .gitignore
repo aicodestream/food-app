@@ -81,3 +81,5 @@ github-token.txt
 **/params.json
 **/parameters.json
 **/*-params.json
+complete-api-params.json
+aws/complete-api-params.json

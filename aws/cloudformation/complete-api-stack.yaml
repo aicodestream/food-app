@@ -1,0 +1,414 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Complete Food Ordering API - All Routes and Functions
+
+Parameters:
+  TwilioAccountSid:
+    Type: String
+    Description: Twilio Account SID
+    NoEcho: true
+  
+  TwilioAuthToken:
+    Type: String
+    Description: Twilio Auth Token
+    NoEcho: true
+  
+  TwilioWhatsAppNumber:
+    Type: String
+    Description: Twilio WhatsApp Number
+    Default: whatsapp:+14155238886
+  
+  TwilioSmsNumber:
+    Type: String
+    Description: Twilio SMS Number
+    Default: +18287981553
+  
+  RestaurantWhatsAppNumber:
+    Type: String
+    Description: Restaurant WhatsApp Number
+    Default: whatsapp:+919766007557
+
+Resources:
+  # ============================================
+  # IAM ROLE - Shared by all Lambda functions
+  # ============================================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: food-ordering-lambda-execution-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*
+
+  # ============================================
+  # DYNAMODB TABLES
+  # ============================================
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: food-ordering-orders
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+        - AttributeName: customerPhone
+          AttributeType: S
+        - AttributeName: orderTime
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: CustomerPhoneIndex
+          KeySchema:
+            - AttributeName: customerPhone
+              KeyType: HASH
+            - AttributeName: orderTime
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  VisitorTrackingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: food-ordering-visitors
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: visitorId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: visitorId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+
+  # ============================================
+  # LAMBDA FUNCTION 1: NOTIFICATIONS
+  # ============================================
+  NotificationFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-notifications
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
+          TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
+          TWILIO_WHATSAPP_NUMBER: !Ref TwilioWhatsAppNumber
+          TWILIO_SMS_NUMBER: !Ref TwilioSmsNumber
+          RESTAURANT_WHATSAPP_NUMBER: !Ref RestaurantWhatsAppNumber
+      Code:
+        ZipFile: |
+          const https = require('https');
+          exports.handler = async (event) => {
+            console.log('Event:', JSON.stringify(event));
+            try {
+              const body = JSON.parse(event.body || '{}');
+              const { orderDetails, customerPhone } = body;
+              if (!orderDetails || !customerPhone) {
+                return { statusCode: 400, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: 'Missing data' }) };
+              }
+              let phone = customerPhone.startsWith('+') ? customerPhone : '+91' + customerPhone.replace(/^91/, '');
+              const restaurantMsg = `🔔 NEW ORDER!\nOrder ID: ${orderDetails.orderId}\nCustomer: ${orderDetails.customerName}\nPhone: ${phone}\nItems: ${orderDetails.items}\nTotal: ₹${orderDetails.total}\nAddress: ${orderDetails.address}`;
+              const customerMsg = `Thank you for your order! Order ID: ${orderDetails.orderId}. Total: ₹${orderDetails.total}. We'll deliver in 30 minutes. - Shiv Tirth Wada`;
+              const results = [];
+              try {
+                await sendTwilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_WHATSAPP_NUMBER, process.env.RESTAURANT_WHATSAPP_NUMBER, restaurantMsg);
+                results.push({ type: 'restaurant_whatsapp', success: true });
+              } catch (e) { results.push({ type: 'restaurant_whatsapp', success: false, error: e.message }); }
+              try {
+                await sendTwilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_SMS_NUMBER, phone, customerMsg);
+                results.push({ type: 'customer_sms', success: true });
+              } catch (e) { results.push({ type: 'customer_sms', success: false, error: e.message }); }
+              const success = results.some(r => r.success);
+              return { statusCode: success ? 200 : 500, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify({ success, results }) };
+            } catch (error) {
+              return { statusCode: 500, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: error.message }) };
+            }
+          };
+          function sendTwilio(sid, token, from, to, body) {
+            return new Promise((resolve, reject) => {
+              const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+              const data = new URLSearchParams({ From: from, To: to, Body: body }).toString();
+              const req = https.request({ hostname: 'api.twilio.com', port: 443, path: `/2010-04-01/Accounts/${sid}/Messages.json`, method: 'POST', headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': data.length } }, (res) => {
+                let d = ''; res.on('data', c => d += c); res.on('end', () => { if (res.statusCode === 201) resolve(JSON.parse(d)); else reject(new Error(d)); });
+              });
+              req.on('error', reject); req.write(data); req.end();
+            });
+          }
+
+  NotificationIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: ewbzhkjb20
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt NotificationFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  NotificationRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: POST /send-notification
+      Target: !Sub integrations/${NotificationIntegration}
+
+  NotificationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref NotificationFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:ewbzhkjb20/*/*
+
+  # ============================================
+  # LAMBDA FUNCTION 2: VISITOR TRACKING
+  # ============================================
+  VisitorTrackingFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-visitor-tracking
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 10
+      Environment:
+        Variables:
+          VISITORS_TABLE: !Ref VisitorTrackingTable
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamodb = new AWS.DynamoDB.DocumentClient();
+          exports.handler = async (event) => {
+            try {
+              const body = JSON.parse(event.body || '{}');
+              const { visitorId, pageUrl } = body;
+              if (!visitorId) return { statusCode: 400, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: 'Missing visitorId' }) };
+              await dynamodb.put({ TableName: process.env.VISITORS_TABLE, Item: { visitorId, timestamp: new Date().toISOString(), pageUrl: pageUrl || '/', userAgent: event.headers['user-agent'] || 'unknown' } }).promise();
+              return { statusCode: 200, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify({ success: true }) };
+            } catch (error) {
+              return { statusCode: 500, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: error.message }) };
+            }
+          };
+
+  VisitorTrackingIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: ewbzhkjb20
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt VisitorTrackingFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  VisitorTrackingRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: POST /track-visit
+      Target: !Sub integrations/${VisitorTrackingIntegration}
+
+  VisitorTrackingPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref VisitorTrackingFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:ewbzhkjb20/*/*
+
+  # ============================================
+  # LAMBDA FUNCTION 3: ORDERS API
+  # ============================================
+  OrdersApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-orders-api
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 10
+      Environment:
+        Variables:
+          ORDERS_TABLE: !Ref OrdersTable
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamodb = new AWS.DynamoDB.DocumentClient();
+          exports.handler = async (event) => {
+            const path = event.rawPath || event.path;
+            const method = event.requestContext.http.method;
+            try {
+              // GET /orders - Get all orders
+              if (path === '/orders' && method === 'GET') {
+                const result = await dynamodb.scan({ TableName: process.env.ORDERS_TABLE }).promise();
+                return { statusCode: 200, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify(result.Items) };
+              }
+              // GET /orders/customer/{phone} - Get orders by customer
+              if (path.startsWith('/orders/customer/') && method === 'GET') {
+                const phone = path.split('/')[3];
+                const result = await dynamodb.query({ TableName: process.env.ORDERS_TABLE, IndexName: 'CustomerPhoneIndex', KeyConditionExpression: 'customerPhone = :phone', ExpressionAttributeValues: { ':phone': phone } }).promise();
+                return { statusCode: 200, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify(result.Items) };
+              }
+              // PATCH /orders/{orderId}/status - Update order status
+              if (path.match(/\/orders\/[^/]+\/status/) && method === 'PATCH') {
+                const orderId = path.split('/')[2];
+                const body = JSON.parse(event.body);
+                await dynamodb.update({ TableName: process.env.ORDERS_TABLE, Key: { orderId }, UpdateExpression: 'SET #status = :status', ExpressionAttributeNames: { '#status': 'status' }, ExpressionAttributeValues: { ':status': body.status } }).promise();
+                return { statusCode: 200, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify({ success: true }) };
+              }
+              return { statusCode: 404, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: 'Not found' }) };
+            } catch (error) {
+              return { statusCode: 500, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: error.message }) };
+            }
+          };
+
+  OrdersApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: ewbzhkjb20
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt OrdersApiFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  OrdersGetRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: GET /orders
+      Target: !Sub integrations/${OrdersApiIntegration}
+
+  OrdersCustomerRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: GET /orders/customer/{phone}
+      Target: !Sub integrations/${OrdersApiIntegration}
+
+  OrdersStatusRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: PATCH /orders/{orderId}/status
+      Target: !Sub integrations/${OrdersApiIntegration}
+
+  OrdersApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref OrdersApiFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:ewbzhkjb20/*/*
+
+  # ============================================
+  # LAMBDA FUNCTION 4: STATS API
+  # ============================================
+  StatsApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-stats-api
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 10
+      Environment:
+        Variables:
+          ORDERS_TABLE: !Ref OrdersTable
+          VISITORS_TABLE: !Ref VisitorTrackingTable
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamodb = new AWS.DynamoDB.DocumentClient();
+          exports.handler = async (event) => {
+            const path = event.rawPath || event.path;
+            try {
+              // GET /stats/daily/{date}
+              if (path.startsWith('/stats/daily/')) {
+                const date = path.split('/')[3];
+                const result = await dynamodb.scan({ TableName: process.env.ORDERS_TABLE, FilterExpression: 'begins_with(orderTime, :date)', ExpressionAttributeValues: { ':date': date } }).promise();
+                const stats = { total_orders: result.Items.length, total_revenue: result.Items.reduce((sum, o) => sum + (o.totalAmount || 0), 0), avg_order_value: result.Items.length ? result.Items.reduce((sum, o) => sum + (o.totalAmount || 0), 0) / result.Items.length : 0, unique_customers: new Set(result.Items.map(o => o.customerPhone)).size };
+                return { statusCode: 200, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify(stats) };
+              }
+              // GET /stats/visitors/today
+              if (path === '/stats/visitors/today') {
+                const today = new Date().toISOString().split('T')[0];
+                const result = await dynamodb.scan({ TableName: process.env.VISITORS_TABLE, FilterExpression: 'begins_with(#ts, :date)', ExpressionAttributeNames: { '#ts': 'timestamp' }, ExpressionAttributeValues: { ':date': today } }).promise();
+                return { statusCode: 200, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify({ unique_visitors: new Set(result.Items.map(v => v.visitorId)).size, page_views: result.Items.length }) };
+              }
+              // GET /stats/visitors/total
+              if (path === '/stats/visitors/total') {
+                const result = await dynamodb.scan({ TableName: process.env.VISITORS_TABLE }).promise();
+                return { statusCode: 200, headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}, body: JSON.stringify({ total_unique_visitors: new Set(result.Items.map(v => v.visitorId)).size }) };
+              }
+              return { statusCode: 404, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: 'Not found' }) };
+            } catch (error) {
+              return { statusCode: 500, headers: {'Access-Control-Allow-Origin': '*'}, body: JSON.stringify({ error: error.message }) };
+            }
+          };
+
+  StatsApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: ewbzhkjb20
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt StatsApiFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  StatsDailyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: GET /stats/daily/{date}
+      Target: !Sub integrations/${StatsApiIntegration}
+
+  StatsVisitorsTodayRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: GET /stats/visitors/today
+      Target: !Sub integrations/${StatsApiIntegration}
+
+  StatsVisitorsTotalRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: GET /stats/visitors/total
+      Target: !Sub integrations/${StatsApiIntegration}
+
+  StatsApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref StatsApiFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:ewbzhkjb20/*/*
+
+Outputs:
+  ApiEndpoint:
+    Value: https://api.aicodestreams.com
+  NotificationFunction:
+    Value: !Ref NotificationFunction
+  OrdersTable:
+    Value: !Ref OrdersTable
+  VisitorsTable:
+    Value: !Ref VisitorTrackingTable

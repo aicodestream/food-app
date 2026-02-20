@@ -249,6 +249,7 @@ async function handleCheckout(e) {
             orderId: orderData.orderId,
             customerName: orderData.customerName,
             items: orderData.items.map(item => `${item.quantity}x ${item.name} - ₹${item.total}`).join(', '),
+            itemsArray: orderData.items, // Add structured array for DynamoDB
             total: orderData.totalAmount,
             address: orderData.deliveryAddress
         },
