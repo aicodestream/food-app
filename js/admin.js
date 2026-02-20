@@ -108,6 +108,8 @@ function filterOrders(status) {
 // Update order status
 async function updateStatus(orderId, newStatus) {
     try {
+        console.log(`Updating order ${orderId} to ${newStatus}...`);
+        
         // Try to update via backend
         const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
             method: 'PATCH',
@@ -117,15 +119,22 @@ async function updateStatus(orderId, newStatus) {
             body: JSON.stringify({ status: newStatus })
         });
         
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
-            loadOrders();
+            console.log('✅ Status updated successfully in database');
+            loadOrders(); // Reload from database
             return;
+        } else {
+            const error = await response.text();
+            console.error('❌ API error:', error);
         }
     } catch (error) {
-        console.log('Backend not available, using localStorage');
+        console.error('❌ Network error:', error);
     }
     
     // Fallback to localStorage
+    console.log('⚠️ Using localStorage fallback');
     const order = orders.find(o => o.orderId === orderId);
     if (order) {
         order.status = newStatus;
