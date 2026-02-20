@@ -373,11 +373,16 @@ async function loadRangeStats() {
 async function loadCustomerBilling() {
     try {
         const response = await fetch(`${API_URL}/stats/customers`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const customers = await response.json();
         
         const resultsDiv = document.getElementById('analytics-results');
         
-        if (customers.length === 0) {
+        if (!customers || customers.length === 0) {
             resultsDiv.innerHTML = '<p style="text-align: center; color: #999;">No customer data available</p>';
             return;
         }
@@ -397,16 +402,18 @@ async function loadCustomerBilling() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${customers.map(customer => `
+                        ${customers.map(customer => {
+                            const avgOrder = customer.total_orders > 0 ? customer.total_spent / customer.total_orders : 0;
+                            return `
                             <tr>
-                                <td>${customer.customer_name}</td>
-                                <td>${customer.customer_phone}</td>
-                                <td>${customer.total_orders}</td>
-                                <td>₹${parseFloat(customer.total_spent).toFixed(2)}</td>
-                                <td>₹${parseFloat(customer.avg_order_value).toFixed(2)}</td>
-                                <td>${new Date(customer.last_order_date).toLocaleDateString()}</td>
+                                <td>${customer.name || 'N/A'}</td>
+                                <td>${customer.phone || 'N/A'}</td>
+                                <td>${customer.total_orders || 0}</td>
+                                <td>₹${parseFloat(customer.total_spent || 0).toFixed(2)}</td>
+                                <td>₹${avgOrder.toFixed(2)}</td>
+                                <td>${customer.last_order ? new Date(customer.last_order).toLocaleDateString() : 'N/A'}</td>
                             </tr>
-                        `).join('')}
+                        `}).join('')}
                     </tbody>
                 </table>
             </div>
