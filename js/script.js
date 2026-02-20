@@ -156,9 +156,9 @@ function setupEventListeners() {
             // Check if user is logged in
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (!user.phone) {
-                // User not logged in - redirect to simple login
+                // User not logged in - redirect to OTP login
                 if (confirm('Please login to place an order. Redirect to login page?')) {
-                    window.location.href = 'login-simple.html';
+                    window.location.href = 'login.html';
                 }
                 return;
             }
@@ -568,7 +568,7 @@ function updateUserSection() {
     } else {
         // User not logged in
         userSection.innerHTML = `
-            <a href="login-simple.html" class="login-link">Login</a>
+            <a href="login.html" class="login-link">Login</a>
         `;
     }
 }
