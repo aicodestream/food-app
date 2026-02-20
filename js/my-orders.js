@@ -4,6 +4,9 @@ const API_URL = 'https://api.aicodestreams.com';
 // Load orders on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadMyOrders();
+    
+    // Auto-refresh orders every 30 seconds
+    setInterval(loadMyOrders, 30000);
 });
 
 // Get customer phone from session/localStorage
@@ -40,6 +43,7 @@ async function loadMyOrders() {
         }
         
         const orders = await response.json();
+        console.log('📦 Orders loaded:', orders.length);
         renderOrders(orders);
         
     } catch (error) {
