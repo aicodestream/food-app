@@ -321,8 +321,6 @@ async function loadRangeStats() {
         
         const stats = await response.json();
         
-        const resultsDiv = document.getElementById('analytics-results');
-        
         if (!stats || stats.total_orders === 0) {
             resultsDiv.innerHTML = '<p style="text-align: center; color: #999;">No orders found in this date range</p>';
             return;
