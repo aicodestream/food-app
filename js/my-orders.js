@@ -70,7 +70,7 @@ function renderOrders(orders) {
     
     ordersList.innerHTML = orders.map(order => {
         const statusClass = order.status.toLowerCase().replace(/ /g, '-');
-        const orderDate = new Date(order.order_time).toLocaleString('en-IN', {
+        const orderDate = new Date(order.orderTime || order.order_time).toLocaleString('en-IN', {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
@@ -82,15 +82,15 @@ function renderOrders(orders) {
             <div class="order-card">
                 <div class="order-header">
                     <div>
-                        <div class="order-id">#${order.order_id}</div>
+                        <div class="order-id">#${order.orderId || order.order_id}</div>
                         <small style="color: #999;">${orderDate}</small>
                     </div>
                     <span class="order-status status-${statusClass}">${order.status}</span>
                 </div>
                 
                 <div class="order-details">
-                    <p><strong>Delivery Address:</strong> ${order.delivery_address}</p>
-                    ${order.estimated_delivery ? `<p><strong>Estimated Delivery:</strong> ${order.estimated_delivery}</p>` : ''}
+                    <p><strong>Delivery Address:</strong> ${order.deliveryAddress || order.delivery_address}</p>
+                    ${(order.estimatedDelivery || order.estimated_delivery) ? `<p><strong>Estimated Delivery:</strong> ${order.estimatedDelivery || order.estimated_delivery}</p>` : ''}
                 </div>
                 
                 <div class="order-items">
@@ -104,7 +104,7 @@ function renderOrders(orders) {
                 </div>
                 
                 <div class="order-total">
-                    Total: ₹${order.total_amount}
+                    Total: ₹${order.totalAmount || order.total_amount}
                 </div>
             </div>
         `;
