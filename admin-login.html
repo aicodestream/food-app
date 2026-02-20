@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Shiv Tirth Wada</title>
+    <link rel="stylesheet" href="css/login.css">
+    <style>
+        .admin-login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .admin-header h1 {
+            color: #C62828;
+            margin-bottom: 0.5rem;
+        }
+        .admin-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #C62828;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #C62828;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-btn:hover {
+            background: #B71C1C;
+        }
+        .login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .back-link a {
+            color: #C62828;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="admin-header">
+            <h1>🔐 Admin Login</h1>
+            <p>Shiv Tirth Wada - Restaurant Management</p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <form id="admin-login-form">
+            <div class="form-group">
+                <label for="admin-password">Admin Password</label>
+                <input 
+                    type="password" 
+                    id="admin-password" 
+                    name="password" 
+                    placeholder="Enter admin password"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="login-btn" id="login-btn">
+                Login to Admin Panel
+            </button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://api.aicodestreams.com';
+
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('admin-password').value;
+            const errorMessage = document.getElementById('error-message');
+            const loginBtn = document.getElementById('login-btn');
+            
+            // Clear previous errors
+            errorMessage.classList.remove('show');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Verifying...';
+            
+            try {
+                console.log('🔐 Attempting admin login...');
+                
+                // Call API to verify password
+                const response = await fetch(`${API_ENDPOINT}/admin-login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                const result = await response.json();
+                console.log('📨 Login response:', result);
+                
+                if (response.ok && result.success) {
+                    // Store admin session
+                    const session = {
+                        token: result.token,
+                        loginTime: new Date().toISOString(),
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+                    };
+                    localStorage.setItem('adminSession', JSON.stringify(session));
+                    
+                    console.log('✅ Login successful, redirecting...');
+                    
+                    // Redirect to admin panel
+                    window.location.href = 'admin.html';
+                } else {
+                    throw new Error(result.error || 'Invalid password');
+                }
+                
+            } catch (error) {
+                console.error('❌ Login failed:', error);
+                errorMessage.textContent = error.message || 'Login failed. Please check your password.';
+                errorMessage.classList.add('show');
+                
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login to Admin Panel';
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const session = localStorage.getItem('adminSession');
+            if (session) {
+                try {
+                    const sessionData = JSON.parse(session);
+                    const expiresAt = new Date(sessionData.expiresAt);
+                    
+                    if (expiresAt > new Date()) {
+                        console.log('✅ Valid session found, redirecting...');
+                        window.location.href = 'admin.html';
+                    } else {
+                        console.log('⏰ Session expired');
+                        localStorage.removeItem('adminSession');
+                    }
+                } catch (e) {
+                    console.error('Invalid session data');
+                    localStorage.removeItem('adminSession');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

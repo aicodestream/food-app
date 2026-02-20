@@ -1,5 +1,5 @@
 // API endpoint
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://api.aicodestreams.com';
 
 // Load orders on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -145,7 +145,7 @@ function trackPageVisit() {
     const visitorId = getOrCreateVisitorId();
     const pageUrl = window.location.pathname;
     
-    fetch('http://localhost:3001/api/track-visit', {
+    fetch('https://api.aicodestreams.com/track-visit', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

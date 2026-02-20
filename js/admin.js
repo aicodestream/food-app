@@ -1,5 +1,5 @@
 // API endpoint
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://api.aicodestreams.com';
 
 // In-memory orders (for testing without backend)
 let orders = [];
@@ -426,5 +426,15 @@ async function loadVisitorStats() {
         
     } catch (error) {
         console.error('Error loading visitor stats:', error);
+    }
+}
+
+
+// Admin logout function
+function adminLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        console.log('🚪 Admin logging out...');
+        localStorage.removeItem('adminSession');
+        window.location.href = 'admin-login.html';
     }
 }

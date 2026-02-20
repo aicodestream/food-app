@@ -19,7 +19,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const password = document.getElementById('login-password').value;
     
     try {
-        const response = await fetch('http://localhost:3001/api/auth/login', {
+        const response = await fetch('https://api.aicodestreams.com/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     const password = document.getElementById('signup-password').value;
     
     try {
-        const response = await fetch('http://localhost:3001/api/auth/register', {
+        const response = await fetch('https://api.aicodestreams.com/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

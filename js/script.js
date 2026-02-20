@@ -528,7 +528,7 @@ function trackPageVisit() {
     const visitorId = getOrCreateVisitorId();
     const pageUrl = window.location.pathname;
     
-    fetch('http://localhost:3001/api/track-visit', {
+    fetch('https://api.aicodestreams.com/track-visit', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

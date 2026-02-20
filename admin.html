@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - QuickBite</title>
     <link rel="stylesheet" href="css/admin.css">
+    <script>
+        // Check admin authentication before page loads
+        (function() {
+            const session = localStorage.getItem('adminSession');
+            if (!session) {
+                console.log('❌ No admin session found, redirecting to login...');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
+            try {
+                const sessionData = JSON.parse(session);
+                const expiresAt = new Date(sessionData.expiresAt);
+                
+                if (expiresAt <= new Date()) {
+                    console.log('⏰ Admin session expired, redirecting to login...');
+                    localStorage.removeItem('adminSession');
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+                
+                console.log('✅ Valid admin session found');
+            } catch (e) {
+                console.error('Invalid session data, redirecting to login...');
+                localStorage.removeItem('adminSession');
+                window.location.href = 'admin-login.html';
+            }
+        })();
+    </script>
 </head>
 <body>
     <header>
@@ -12,6 +41,9 @@
             <img src="images/logo.png" alt="Shiv Tirth Wada Logo" style="height: 60px; vertical-align: middle; margin-right: 10px;">
             <span data-translate="restaurantName">Shiv Tirth Wada</span> Admin Panel
         </h1>
+        <button onclick="adminLogout()" style="background: #C62828; color: white; padding: 0.5rem 1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            🚪 Logout
+        </button>
     </header>
 
     <main>
