@@ -1,0 +1,17 @@
+{
+  "Changes": [
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "_950209a5d7c7bfd43d96d683a185ec09.api.aicodestreams.com",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "_79bc0d857c24a3dc661e13fb9a6baa56.jkddzztszm.acm-validations.aws."
+          }
+        ]
+      }
+    }
+  ]
+}

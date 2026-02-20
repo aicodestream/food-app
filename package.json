@@ -1,0 +1,26 @@
+{
+  "name": "food-ordering-website",
+  "version": "1.0.0",
+  "description": "Food ordering website with WhatsApp notifications via Twilio",
+  "scripts": {
+    "start": "npx http-server -p 8080",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mysql2": "^3.17.3",
+    "twilio": "^5.12.2"
+  },
+  "keywords": [
+    "food",
+    "ordering",
+    "twilio",
+    "whatsapp",
+    "vercel"
+  ],
+  "author": "",
+  "license": "MIT"
+}

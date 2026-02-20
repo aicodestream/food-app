@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with OTP - Shiv Tirth Wada</title>
+    <link rel="stylesheet" href="css/login.css">
+    <style>
+        .otp-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .otp-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .otp-header h2 {
+            color: #C62828;
+            margin-bottom: 10px;
+        }
+        
+        .otp-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #C62828;
+        }
+        
+        .btn-otp {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #C62828, #FF8A65);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-otp:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-otp:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .otp-step {
+            display: none;
+        }
+        
+        .otp-step.active {
+            display: block;
+        }
+        
+        .timer {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .resend-link {
+            color: #C62828;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .resend-link.disabled {
+            color: #999;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #C62828;
+            text-decoration: none;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="otp-container">
+        <div class="otp-header">
+            <h2>🍛 Shiv Tirth Wada</h2>
+            <p>Login with your phone number</p>
+        </div>
+
+        <div id="message"></div>
+
+        <!-- Step 1: Enter Phone Number -->
+        <div id="step-phone" class="otp-step active">
+            <form id="phone-form">
+                <div class="input-group">
+                    <label for="phone">Phone Number</label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        placeholder="Enter 10-digit mobile number" 
+                        pattern="[0-9]{10}"
+                        maxlength="10"
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn-otp" id="send-otp-btn">
+                    Send OTP
+                </button>
+            </form>
+        </div>
+
+        <!-- Step 2: Enter OTP -->
+        <div id="step-otp" class="otp-step">
+            <form id="otp-form">
+                <div class="input-group">
+                    <label for="otp">Enter OTP</label>
+                    <input 
+                        type="text" 
+                        id="otp" 
+                        placeholder="Enter 6-digit OTP" 
+                        pattern="[0-9]{6}"
+                        maxlength="6"
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn-otp" id="verify-otp-btn">
+                    Verify & Login
+                </button>
+                <div class="timer">
+                    <span id="timer-text">OTP valid for <span id="countdown">5:00</span></span>
+                    <br>
+                    <span class="resend-link disabled" id="resend-link">Resend OTP</span>
+                </div>
+            </form>
+            <div class="back-link">
+                <a href="#" id="change-number">Change phone number</a>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        let phoneNumber = '';
+        let countdownTimer = null;
+
+        // Show message
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Start countdown timer
+        function startCountdown(seconds) {
+            let remaining = seconds;
+            const countdownEl = document.getElementById('countdown');
+            const resendLink = document.getElementById('resend-link');
+            
+            resendLink.classList.add('disabled');
+            
+            countdownTimer = setInterval(() => {
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                countdownEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                
+                remaining--;
+                
+                if (remaining < 0) {
+                    clearInterval(countdownTimer);
+                    resendLink.classList.remove('disabled');
+                    countdownEl.textContent = 'Expired';
+                }
+            }, 1000);
+        }
+
+        // Send OTP
+        document.getElementById('phone-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            phoneNumber = document.getElementById('phone').value;
+            const sendBtn = document.getElementById('send-otp-btn');
+            
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phoneNumber })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('OTP sent successfully! Check your phone.', 'success');
+                    
+                    // Show OTP step
+                    document.getElementById('step-phone').classList.remove('active');
+                    document.getElementById('step-otp').classList.add('active');
+                    
+                    // Start countdown
+                    startCountdown(300); // 5 minutes
+                    
+                    // For development - show OTP in console
+                    if (data.otp) {
+                        console.log('Development OTP:', data.otp);
+                    }
+                } else {
+                    showMessage(data.error || 'Failed to send OTP', 'error');
+                }
+            } catch (error) {
+                console.error('Send OTP error:', error);
+                showMessage('Failed to send OTP. Please try again.', 'error');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send OTP';
+            }
+        });
+
+        // Verify OTP
+        document.getElementById('otp-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const otp = document.getElementById('otp').value;
+            const verifyBtn = document.getElementById('verify-otp-btn');
+            
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Verifying...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phoneNumber, otp })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store user data
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('userPhone', data.user.phone);
+                    
+                    showMessage('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        if (data.user.role === 'admin') {
+                            window.location.href = 'admin.html';
+                        } else {
+                            window.location.href = 'my-orders.html';
+                        }
+                    }, 1000);
+                } else {
+                    showMessage(data.message || 'Invalid OTP', 'error');
+                }
+            } catch (error) {
+                console.error('Verify OTP error:', error);
+                showMessage('Verification failed. Please try again.', 'error');
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify & Login';
+            }
+        });
+
+        // Resend OTP
+        document.getElementById('resend-link').addEventListener('click', async function() {
+            if (this.classList.contains('disabled')) return;
+            
+            this.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phoneNumber })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('OTP resent successfully!', 'success');
+                    startCountdown(300);
+                    document.getElementById('otp').value = '';
+                } else {
+                    showMessage('Failed to resend OTP', 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to resend OTP', 'error');
+            } finally {
+                this.textContent = 'Resend OTP';
+            }
+        });
+
+        // Change number
+        document.getElementById('change-number').addEventListener('click', (e) => {
+            e.preventDefault();
+            clearInterval(countdownTimer);
+            document.getElementById('step-otp').classList.remove('active');
+            document.getElementById('step-phone').classList.add('active');
+            document.getElementById('otp').value = '';
+        });
+    </script>
+</body>
+</html>

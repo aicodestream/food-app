@@ -1,0 +1,70 @@
+{
+  "name": "Food Order WhatsApp Notification (Twilio)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "food-order",
+        "responseMode": "responseNode"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "fromPhoneNumber": "whatsapp:+YOUR_TWILIO_NUMBER",
+        "toPhoneNumber": "=whatsapp:{{ $json.customerPhone }}",
+        "message": "=🍔 QuickBite Order Confirmation\n\nOrder ID: {{ $json.orderId }}\nCustomer: {{ $json.customerName }}\n\nItems:\n{{ $json.items.map(item => `${item.quantity}x ${item.name} - $${item.total.toFixed(2)}`).join('\\n') }}\n\nTotal: ${{ $json.totalAmount.toFixed(2) }}\nDelivery Address: {{ $json.deliveryAddress }}\n\nEstimated Delivery: {{ $json.estimatedDelivery }}\n\nThank you for your order! 🎉"
+      },
+      "name": "Twilio",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "twilioApi": {
+          "id": "1",
+          "name": "Twilio API"
+        }
+      }
+    }
+  ]
+}
+,
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"orderId\": $json.orderId, \"message\": \"Order confirmed! WhatsApp notification sent.\" } }}"
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Twilio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twilio": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

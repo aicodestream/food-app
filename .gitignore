@@ -1,0 +1,83 @@
+# Sensitive files and credentials
+.env
+.env.local
+.env.production
+*.env
+aws/.env
+aws/.env.*
+
+# Deployment scripts with credentials
+aws/deploy-dynamodb.sh
+aws/robust-backend-params.json
+**/deploy-*-with-credentials.sh
+
+# Lambda zip files
+*.zip
+lambda-update.zip
+frontend-fix.zip
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# AWS credentials and config
+.aws/
+aws-credentials.json
+
+# Database credentials
+database/.env
+database/config-prod.js
+
+# Test files with sensitive data
+**/test-*-credentials.*
+**/check-*-credentials.*
+
+# Backup files
+*.bak
+*.backup
+
+# Personal access tokens
+github-token.txt
+*.token
+
+# Certificate files
+*.pem
+*.key
+*.crt
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# CloudFormation parameter files with real values
+**/params.json
+**/parameters.json
+**/*-params.json

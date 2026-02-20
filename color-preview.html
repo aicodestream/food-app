@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Scheme Preview - Spice Kitchen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .scheme-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .scheme {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .scheme h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .scheme-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .colors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .color-box {
+            text-align: center;
+        }
+
+        .color-swatch {
+            height: 100px;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .color-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .color-code {
+            font-family: 'Courier New', monospace;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .preview {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .preview-header {
+            padding: 1rem;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .preview-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .preview-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .preview-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .apply-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .apply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .current-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Color Scheme Preview - Spice Kitchen</h1>
+    
+    <div class="scheme-container">
+        <!-- Current Scheme -->
+        <div class="scheme">
+            <h2>Current Scheme <span class="current-badge">ACTIVE</span></h2>
+            <p class="scheme-description">Warm, appetizing, energetic - Perfect for food industry</p>
+            
+            <div class="colors">
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #ff6b35;">Primary</div>
+                    <div class="color-label">Primary</div>
+                    <div class="color-code">#ff6b35</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #f7931e;">Secondary</div>
+                    <div class="color-label">Secondary</div>
+                    <div class="color-code">#f7931e</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFC107;">Accent</div>
+                    <div class="color-label">Accent</div>
+                    <div class="color-code">#FFC107</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #f5f5f5; color: #333;">Background</div>
+                    <div class="color-label">Background</div>
+                    <div class="color-code">#f5f5f5</div>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-header" style="background: linear-gradient(135deg, #ff6b35, #f7931e);">
+                    🍛 Spice Kitchen
+                </div>
+                <div class="preview-buttons">
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #ff6b35, #f7931e);">Order Now</button>
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #f7931e, #FFC107);">View Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Option 1: Saffron & Deep Red -->
+        <div class="scheme">
+            <h2>Option 1: Saffron & Deep Red</h2>
+            <p class="scheme-description">Traditional Indian - Represents Indian flag colors, spices, warmth</p>
+            
+            <div class="colors">
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FF6B35;">Primary</div>
+                    <div class="color-label">Primary</div>
+                    <div class="color-code">#FF6B35</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #D32F2F;">Secondary</div>
+                    <div class="color-label">Secondary</div>
+                    <div class="color-code">#D32F2F</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFC107;">Accent</div>
+                    <div class="color-label">Accent</div>
+                    <div class="color-code">#FFC107</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFF8E1; color: #333;">Background</div>
+                    <div class="color-label">Background</div>
+                    <div class="color-code">#FFF8E1</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #2C1810;">Text</div>
+                    <div class="color-label">Text</div>
+                    <div class="color-code">#2C1810</div>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-header" style="background: linear-gradient(135deg, #FF6B35, #D32F2F);">
+                    🍛 Spice Kitchen
+                </div>
+                <div class="preview-buttons">
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #FF6B35, #D32F2F);">Order Now</button>
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #D32F2F, #FFC107);">View Menu</button>
+                </div>
+            </div>
+            
+            <button class="apply-btn" onclick="alert('To apply this scheme, tell me: Apply Option 1')">
+                ✨ Apply This Scheme
+            </button>
+        </div>
+
+        <!-- Option 2: Turmeric & Emerald -->
+        <div class="scheme">
+            <h2>Option 2: Turmeric & Emerald</h2>
+            <p class="scheme-description">Modern Indian - Fresh, contemporary, represents spices + herbs</p>
+            
+            <div class="colors">
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFA726;">Primary</div>
+                    <div class="color-label">Primary</div>
+                    <div class="color-code">#FFA726</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #00897B;">Secondary</div>
+                    <div class="color-label">Secondary</div>
+                    <div class="color-code">#00897B</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFD54F;">Accent</div>
+                    <div class="color-label">Accent</div>
+                    <div class="color-code">#FFD54F</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FAFAFA; color: #333;">Background</div>
+                    <div class="color-label">Background</div>
+                    <div class="color-code">#FAFAFA</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #263238;">Text</div>
+                    <div class="color-label">Text</div>
+                    <div class="color-code">#263238</div>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-header" style="background: linear-gradient(135deg, #FFA726, #00897B);">
+                    🍛 Spice Kitchen
+                </div>
+                <div class="preview-buttons">
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #FFA726, #00897B);">Order Now</button>
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #00897B, #FFD54F);">View Menu</button>
+                </div>
+            </div>
+            
+            <button class="apply-btn" onclick="alert('To apply this scheme, tell me: Apply Option 2')">
+                ✨ Apply This Scheme
+            </button>
+        </div>
+
+        <!-- Option 3: Maroon & Gold -->
+        <div class="scheme">
+            <h2>Option 3: Maroon & Gold</h2>
+            <p class="scheme-description">Royal/Premium - Luxurious, traditional, elegant Mughal colors</p>
+            
+            <div class="colors">
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #8B0000;">Primary</div>
+                    <div class="color-label">Primary</div>
+                    <div class="color-code">#8B0000</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #DAA520;">Secondary</div>
+                    <div class="color-label">Secondary</div>
+                    <div class="color-code">#DAA520</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FF6B35;">Accent</div>
+                    <div class="color-label">Accent</div>
+                    <div class="color-code">#FF6B35</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFF5E6; color: #333;">Background</div>
+                    <div class="color-label">Background</div>
+                    <div class="color-code">#FFF5E6</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #1A1A1A;">Text</div>
+                    <div class="color-label">Text</div>
+                    <div class="color-code">#1A1A1A</div>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-header" style="background: linear-gradient(135deg, #8B0000, #DAA520);">
+                    🍛 Spice Kitchen
+                </div>
+                <div class="preview-buttons">
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #8B0000, #DAA520);">Order Now</button>
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #DAA520, #FF6B35);">View Menu</button>
+                </div>
+            </div>
+            
+            <button class="apply-btn" onclick="alert('To apply this scheme, tell me: Apply Option 3')">
+                ✨ Apply This Scheme
+            </button>
+        </div>
+
+        <!-- Option 4: Tandoor Red & Cream -->
+        <div class="scheme">
+            <h2>Option 4: Tandoor Red & Cream</h2>
+            <p class="scheme-description">Rustic - Represents tandoor cooking, earthy, warm, homely</p>
+            
+            <div class="colors">
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #C62828;">Primary</div>
+                    <div class="color-label">Primary</div>
+                    <div class="color-code">#C62828</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FF8A65;">Secondary</div>
+                    <div class="color-label">Secondary</div>
+                    <div class="color-code">#FF8A65</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFB74D;">Accent</div>
+                    <div class="color-label">Accent</div>
+                    <div class="color-code">#FFB74D</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #FFFBF0; color: #333;">Background</div>
+                    <div class="color-label">Background</div>
+                    <div class="color-code">#FFFBF0</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #3E2723;">Text</div>
+                    <div class="color-label">Text</div>
+                    <div class="color-code">#3E2723</div>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-header" style="background: linear-gradient(135deg, #C62828, #FF8A65);">
+                    🍛 Spice Kitchen
+                </div>
+                <div class="preview-buttons">
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #C62828, #FF8A65);">Order Now</button>
+                    <button class="preview-btn" style="background: linear-gradient(135deg, #FF8A65, #FFB74D);">View Menu</button>
+                </div>
+            </div>
+            
+            <button class="apply-btn" onclick="alert('To apply this scheme, tell me: Apply Option 4')">
+                ✨ Apply This Scheme
+            </button>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: white; border-radius: 15px; max-width: 800px; margin: 3rem auto;">
+        <h2>How to Apply a Color Scheme</h2>
+        <p style="color: #666; margin: 1rem 0;">
+            Choose your favorite color scheme above and tell me:<br>
+            <strong>"Apply Option 1"</strong> or <strong>"Apply Option 2"</strong> etc.
+        </p>
+        <p style="color: #999; font-size: 0.9rem; margin-top: 1rem;">
+            I'll update all the CSS files with your chosen colors automatically!
+        </p>
+    </div>
+</body>
+</html>

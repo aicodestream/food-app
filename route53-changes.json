@@ -1,0 +1,30 @@
+{
+  "Changes": [
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "app.aicodestreams.com",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "d2nxyk7378wvw0.cloudfront.net"
+          }
+        ]
+      }
+    },
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "_8efe6aae5a6da592f4dc9520578c50ac.aicodestreams.com",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "_140d0341b210824863aea17a18066dd2.jkddzztszm.acm-validations.aws."
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery - Order Now</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader">
+            <div class="food-icon">🍛</div>
+            <p>Loading delicious food...</p>
+        </div>
+    </div>
+
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="images/logo.png" alt="Shiv Tirth Wada Logo" class="logo-img">
+                <span data-translate="restaurantName">Shiv Tirth Wada</span>
+            </div>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#menu" data-translate="menu">Menu</a></li>
+                <li><a href="my-orders.html" data-translate="myOrders">My Orders</a></li>
+                <li><a href="#cart" class="cart-link"><span data-translate="cart">Cart</span> (<span id="cart-count">0</span>)</a></li>
+                <li><button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">मराठी</button></li>
+                <li id="user-section">
+                    <!-- User info will be inserted here by JavaScript -->
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1 data-translate="heroTitle">Delicious Food Delivered Fast</h1>
+            <p data-translate="heroSubtitle">Order your favorite meals and get them delivered in 30 minutes</p>
+            <a href="#menu" class="btn" data-translate="orderNow">Order Now</a>
+        </div>
+    </section>
+
+    <section id="menu" class="menu">
+        <h2 data-translate="ourMenu">Our Menu</h2>
+        
+        <div class="category">
+            <h3 data-translate="appetizers">🥟 Appetizers</h3>
+            <div class="menu-grid" id="appetizers"></div>
+        </div>
+
+        <div class="category">
+            <h3 data-translate="mainCourses">🍛 Main Courses</h3>
+            <div class="menu-grid" id="main-courses"></div>
+        </div>
+
+        <div class="category">
+            <h3 data-translate="desserts">🍰 Desserts</h3>
+            <div class="menu-grid" id="desserts"></div>
+        </div>
+
+        <div class="category">
+            <h3 data-translate="beverages">🥤 Beverages</h3>
+            <div class="menu-grid" id="beverages"></div>
+        </div>
+    </section>
+
+    <section id="cart" class="cart-section">
+        <h2 data-translate="yourCart">Your Cart</h2>
+        <div id="cart-items"></div>
+        <div class="cart-total">
+            <h3><span data-translate="total">Total</span>: ₹<span id="total-price">0.00</span></h3>
+            <button class="btn" id="checkout-btn" data-translate="checkout">Proceed to Checkout</button>
+        </div>
+    </section>
+
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-translate="customerDetails">Checkout</h2>
+            <form id="checkout-form">
+                <input type="text" id="customer-name" data-translate="name" placeholder="Full Name" required>
+                <input type="tel" id="customer-phone" data-translate="phone" placeholder="Phone Number" required>
+                <textarea id="delivery-address" data-translate="address" placeholder="Delivery Address" rows="3" required></textarea>
+                <div class="order-summary">
+                    <h3 data-translate="orderItems">Order Summary</h3>
+                    <div id="summary-items"></div>
+                    <p class="summary-total"><span data-translate="total">Total</span>: ₹<span id="summary-total">0.00</span></p>
+                </div>
+                <button type="submit" class="btn" data-translate="placeOrder">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <h2 data-translate="orderConfirmed">✅ Order Confirmed!</h2>
+            <div id="confirmation-details"></div>
+            <p class="whatsapp-notice" data-translate="ownerWillCall">📞 Our restaurant owner will call you shortly to confirm your order.</p>
+            <button class="btn" onclick="location.reload()" data-translate="backToMenu">Place Another Order</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 <span data-translate="restaurantName">Shiv Tirth Wada</span>. All rights reserved.</p>
+    </footer>
+
+    <script src="js/translations.js"></script>
+    <script src="js/menu-data.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

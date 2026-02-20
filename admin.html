@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - QuickBite</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <header>
+        <h1>
+            <img src="images/logo.png" alt="Shiv Tirth Wada Logo" style="height: 60px; vertical-align: middle; margin-right: 10px;">
+            <span data-translate="restaurantName">Shiv Tirth Wada</span> Admin Panel
+        </h1>
+    </header>
+
+    <main>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('orders')">Orders</button>
+            <button class="tab-btn" onclick="showTab('analytics')">Analytics</button>
+        </div>
+
+        <div id="orders-tab" class="tab-content active">
+            <div class="stats">
+                <div class="stat-card" onclick="filterOrders('all')" style="cursor: pointer;">
+                    <h3>Total Orders</h3>
+                    <p id="total-orders">0</p>
+                </div>
+                <div class="stat-card" onclick="filterOrders('Pending')" style="cursor: pointer;">
+                    <h3>Pending</h3>
+                    <p id="pending-orders">0</p>
+                </div>
+                <div class="stat-card" onclick="filterOrders('Preparing')" style="cursor: pointer;">
+                    <h3>Preparing</h3>
+                    <p id="preparing-orders">0</p>
+                </div>
+                <div class="stat-card" onclick="filterOrders('Out for Delivery')" style="cursor: pointer;">
+                    <h3>Out for Delivery</h3>
+                    <p id="delivering-orders">0</p>
+                </div>
+                <div class="stat-card" onclick="filterOrders('Delivered')" style="cursor: pointer;">
+                    <h3>Completed</h3>
+                    <p id="completed-orders">0</p>
+                </div>
+            </div>
+
+            <div class="stats" style="margin-top: 2rem;">
+                <div class="stat-card visitor-card">
+                    <h3>👥 Today's Visitors</h3>
+                    <p id="today-visitors">0</p>
+                </div>
+                <div class="stat-card visitor-card">
+                    <h3>📄 Today's Page Views</h3>
+                    <p id="today-pageviews">0</p>
+                </div>
+                <div class="stat-card visitor-card">
+                    <h3>🌐 Total Visitors</h3>
+                    <p id="total-visitors">0</p>
+                </div>
+            </div>
+
+            <div class="orders-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 id="orders-title">All Orders</h2>
+                    <button class="btn" onclick="loadOrders()">Refresh Orders</button>
+                </div>
+                <div id="orders-list"></div>
+            </div>
+        </div>
+
+        <div id="analytics-tab" class="tab-content">
+            <div class="analytics-section">
+                <h2>Analytics & Reports</h2>
+                
+                <div class="analytics-filters">
+                    <div class="filter-group">
+                        <label>Quick Stats</label>
+                        <button class="btn" onclick="loadDailyStats()">Today</button>
+                        <button class="btn" onclick="loadYesterdayStats()">Yesterday</button>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Date Range</label>
+                        <input type="date" id="start-date">
+                        <input type="date" id="end-date">
+                        <button class="btn" onclick="loadRangeStats()">Load Range</button>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Customer Billing</label>
+                        <button class="btn" onclick="loadCustomerBilling()">Load Customers</button>
+                    </div>
+                </div>
+
+                <div id="analytics-results"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

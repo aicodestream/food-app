@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Food Ordering Website - WhatsApp Notification Service
+
+Parameters:
+  TwilioAccountSid:
+    Type: String
+    Description: Twilio Account SID
+    NoEcho: true
+  
+  TwilioAuthToken:
+    Type: String
+    Description: Twilio Auth Token
+    NoEcho: true
+  
+  TwilioWhatsAppNumber:
+    Type: String
+    Description: Twilio WhatsApp Number (format whatsapp:+14155238886)
+    Default: whatsapp:+14155238886
+  
+  RestaurantWhatsAppNumber:
+    Type: String
+    Description: Restaurant/Business WhatsApp Number to receive orders (format whatsapp:+919876543210)
+
+Resources:
+  # Lambda Function
+  SendWhatsAppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: food-ordering-send-whatsapp
+      Handler: send-whatsapp.handler
+      Runtime: nodejs20.x
+      CodeUri: ../lambda/
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
+          TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
+          TWILIO_WHATSAPP_NUMBER: !Ref TwilioWhatsAppNumber
+          RESTAURANT_WHATSAPP_NUMBER: !Ref RestaurantWhatsAppNumber
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /send-whatsapp
+            Method: post
+            RestApiId: !Ref ApiGateway
+        OptionsEvent:
+          Type: Api
+          Properties:
+            Path: /send-whatsapp
+            Method: options
+            RestApiId: !Ref ApiGateway
+
+  # API Gateway
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: food-ordering-api
+      StageName: prod
+      Cors:
+        AllowMethods: "'POST, OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
+  # CloudWatch Log Group
+  FunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${SendWhatsAppFunction}
+      RetentionInDays: 7
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/send-whatsapp
+    Export:
+      Name: FoodOrderingApiEndpoint
+  
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt SendWhatsAppFunction.Arn
+    Export:
+      Name: FoodOrderingFunctionArn

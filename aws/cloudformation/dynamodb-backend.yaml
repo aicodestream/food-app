@@ -1,0 +1,491 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Food Ordering API - Lambda, API Gateway, and DynamoDB'
+
+Parameters:
+  TwilioAccountSid:
+    Type: String
+    Description: Twilio Account SID
+    NoEcho: true
+  
+  TwilioAuthToken:
+    Type: String
+    Description: Twilio Auth Token
+    NoEcho: true
+  
+  TwilioWhatsAppNumber:
+    Type: String
+    Default: 'whatsapp:+14155238886'
+  
+  TwilioSmsNumber:
+    Type: String
+  
+  RestaurantWhatsAppNumber:
+    Type: String
+    Default: 'whatsapp:+919766007557'
+  
+  RestaurantSmsNumber:
+    Type: String
+    Default: '+919766007557'
+
+Resources:
+  # DynamoDB Tables
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: food-orders
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+        - AttributeName: customerPhone
+          AttributeType: S
+        - AttributeName: orderTime
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: CustomerPhoneIndex
+          KeySchema:
+            - AttributeName: customerPhone
+              KeyType: HASH
+            - AttributeName: orderTime
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: food-users
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: phone
+          AttributeType: S
+      KeySchema:
+        - AttributeName: phone
+          KeyType: HASH
+
+  OTPTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: food-otp
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: phone
+          AttributeType: S
+      KeySchema:
+        - AttributeName: phone
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+
+  VisitorStatsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: food-visitor-stats
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: date
+          AttributeType: S
+      KeySchema:
+        - AttributeName: date
+          KeyType: HASH
+
+  # Lambda Execution Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:UpdateItem'
+                  - 'dynamodb:DeleteItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:Scan'
+                Resource:
+                  - !GetAtt OrdersTable.Arn
+                  - !GetAtt UsersTable.Arn
+                  - !GetAtt OTPTable.Arn
+                  - !GetAtt VisitorStatsTable.Arn
+                  - !Sub '${OrdersTable.Arn}/index/*'
+
+  # Main API Lambda Function
+  ApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-api
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 512
+      Code:
+        ZipFile: |
+          const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+          const https = require('https');
+          
+          const client = new DynamoDBClient({});
+          const dynamodb = DynamoDBDocumentClient.from(client);
+          
+          exports.handler = async (event) => {
+            console.log('Event:', JSON.stringify(event));
+            
+            const { httpMethod, path, body, queryStringParameters } = event;
+            const requestBody = body ? JSON.parse(body) : {};
+            
+            const headers = {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Headers': 'Content-Type',
+              'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
+            };
+            
+            try {
+              // Handle CORS preflight
+              if (httpMethod === 'OPTIONS') {
+                return { statusCode: 200, headers, body: '' };
+              }
+              
+              // Route requests
+              if (path === '/send-notification' && httpMethod === 'POST') {
+                return await handleSendNotification(requestBody, headers);
+              } else if (path === '/orders' && httpMethod === 'POST') {
+                return await handleCreateOrder(requestBody, headers);
+              } else if (path === '/orders' && httpMethod === 'GET') {
+                return await handleGetOrders(queryStringParameters, headers);
+              } else if (path.startsWith('/orders/') && httpMethod === 'GET') {
+                const orderId = path.split('/')[2];
+                return await handleGetOrder(orderId, headers);
+              } else if (path.includes('/orders/') && path.includes('/status') && httpMethod === 'PATCH') {
+                const orderId = path.split('/')[2];
+                return await handleUpdateOrderStatus(orderId, requestBody, headers);
+              } else if (path.startsWith('/orders/customer/') && httpMethod === 'GET') {
+                const customerPhone = path.split('/')[3];
+                return await handleGetCustomerOrders(customerPhone, headers);
+              } else if (path === '/auth/login' && httpMethod === 'POST') {
+                return await handleLogin(requestBody, headers);
+              } else if (path === '/track-visit' && httpMethod === 'POST') {
+                return await handleTrackVisit(requestBody, headers);
+              } else if (path.startsWith('/stats/') && httpMethod === 'GET') {
+                return await handleStats(path, queryStringParameters, headers);
+              }
+              
+              return {
+                statusCode: 404,
+                headers,
+                body: JSON.stringify({ error: 'Not found' })
+              };
+              
+            } catch (error) {
+              console.error('Error:', error);
+              return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({ error: error.message })
+              };
+            }
+          };
+          
+          async function handleSendNotification(body, headers) {
+            const { orderDetails, customerPhone } = body;
+            
+            // Send notifications
+            await sendTwilioMessage(
+              process.env.TWILIO_ACCOUNT_SID,
+              process.env.TWILIO_AUTH_TOKEN,
+              process.env.TWILIO_WHATSAPP_NUMBER,
+              process.env.RESTAURANT_WHATSAPP_NUMBER,
+              `🔔 NEW ORDER!\n\nOrder ID: ${orderDetails.orderId}\nCustomer: ${orderDetails.customerName}\nPhone: ${customerPhone}\nItems: ${orderDetails.items}\nTotal: ₹${orderDetails.total}\nAddress: ${orderDetails.address}`
+            );
+            
+            await sendTwilioMessage(
+              process.env.TWILIO_ACCOUNT_SID,
+              process.env.TWILIO_AUTH_TOKEN,
+              process.env.TWILIO_SMS_NUMBER,
+              customerPhone,
+              `Thank you for your order! Order ID: ${orderDetails.orderId}. Total: ₹${orderDetails.total}. We'll deliver in 30 minutes.`
+            );
+            
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify({ success: true, message: 'Notifications sent' })
+            };
+          }
+          
+          async function handleCreateOrder(body, headers) {
+            const orderData = {
+              ...body,
+              orderTime: new Date().toISOString(),
+              status: 'Pending'
+            };
+            
+            await dynamodb.send(new PutCommand({
+              TableName: 'food-orders',
+              Item: orderData
+            }));
+            
+            return {
+              statusCode: 201,
+              headers,
+              body: JSON.stringify({ success: true, orderId: orderData.orderId })
+            };
+          }
+          
+          async function handleGetOrders(queryParams, headers) {
+            const result = await dynamodb.send(new ScanCommand({
+              TableName: 'food-orders'
+            }));
+            
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify(result.Items)
+            };
+          }
+          
+          async function handleGetOrder(orderId, headers) {
+            const result = await dynamodb.send(new GetCommand({
+              TableName: 'food-orders',
+              Key: { orderId }
+            }));
+            
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify(result.Item || {})
+            };
+          }
+          
+          async function handleUpdateOrderStatus(orderId, body, headers) {
+            const { status } = body;
+            
+            await dynamodb.send(new UpdateCommand({
+              TableName: 'food-orders',
+              Key: { orderId },
+              UpdateExpression: 'SET #status = :status',
+              ExpressionAttributeNames: { '#status': 'status' },
+              ExpressionAttributeValues: { ':status': status }
+            }));
+            
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify({ success: true })
+            };
+          }
+          
+          async function handleGetCustomerOrders(customerPhone, headers) {
+            const result = await dynamodb.send(new QueryCommand({
+              TableName: 'food-orders',
+              IndexName: 'CustomerPhoneIndex',
+              KeyConditionExpression: 'customerPhone = :phone',
+              ExpressionAttributeValues: { ':phone': customerPhone },
+              ScanIndexForward: false
+            }));
+            
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify(result.Items)
+            };
+          }
+          
+          async function handleLogin(body, headers) {
+            const { phone, otp } = body;
+            
+            // Verify OTP (simplified - in production, verify against OTP table)
+            if (otp === '1234') {
+              // Get or create user
+              let result = await dynamodb.send(new GetCommand({
+                TableName: 'food-users',
+                Key: { phone }
+              }));
+              
+              if (!result.Item) {
+                const userData = { phone, createdAt: new Date().toISOString() };
+                await dynamodb.send(new PutCommand({
+                  TableName: 'food-users',
+                  Item: userData
+                }));
+                result.Item = userData;
+              }
+              
+              return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({ success: true, user: result.Item })
+              };
+            }
+            
+            return {
+              statusCode: 401,
+              headers,
+              body: JSON.stringify({ success: false, error: 'Invalid OTP' })
+            };
+          }
+          
+          async function handleTrackVisit(body, headers) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            await dynamodb.send(new UpdateCommand({
+              TableName: 'food-visitor-stats',
+              Key: { date: today },
+              UpdateExpression: 'ADD visitors :inc, pageViews :inc',
+              ExpressionAttributeValues: { ':inc': 1 }
+            }));
+            
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify({ success: true })
+            };
+          }
+          
+          async function handleStats(path, queryParams, headers) {
+            // Simplified stats - return mock data for now
+            const stats = {
+              totalOrders: 0,
+              totalRevenue: 0,
+              visitors: 0,
+              pageViews: 0
+            };
+            
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify(stats)
+            };
+          }
+          
+          function sendTwilioMessage(accountSid, authToken, from, to, body) {
+            return new Promise((resolve, reject) => {
+              const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+              const postData = new URLSearchParams({ From: from, To: to, Body: body }).toString();
+              
+              const options = {
+                hostname: 'api.twilio.com',
+                port: 443,
+                path: `/2010-04-01/Accounts/${accountSid}/Messages.json`,
+                method: 'POST',
+                headers: {
+                  'Authorization': `Basic ${auth}`,
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Content-Length': postData.length
+                }
+              };
+              
+              const req = https.request(options, (res) => {
+                let data = '';
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                  if (res.statusCode === 201) {
+                    resolve(JSON.parse(data));
+                  } else {
+                    reject(new Error(`Twilio error: ${data}`));
+                  }
+                });
+              });
+              
+              req.on('error', reject);
+              req.write(postData);
+              req.end();
+            });
+          }
+      Environment:
+        Variables:
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
+          TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
+          TWILIO_WHATSAPP_NUMBER: !Ref TwilioWhatsAppNumber
+          TWILIO_SMS_NUMBER: !Ref TwilioSmsNumber
+          RESTAURANT_WHATSAPP_NUMBER: !Ref RestaurantWhatsAppNumber
+          RESTAURANT_SMS_NUMBER: !Ref RestaurantSmsNumber
+
+  # API Gateway
+  ApiGateway:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: food-ordering-dynamodb-api
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+          - OPTIONS
+        AllowHeaders:
+          - '*'
+
+  # Lambda Integration
+  ApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGateway
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt ApiFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  # Catch-all route
+  ApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      RouteKey: '$default'
+      Target: !Sub 'integrations/${ApiIntegration}'
+
+  # API Stage
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref ApiGateway
+      StageName: '$default'
+      AutoDeploy: true
+
+  # Lambda Permission
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com'
+  
+  FunctionName:
+    Description: Lambda Function Name
+    Value: !Ref ApiFunction
+    
+  OrdersTableName:
+    Description: Orders DynamoDB Table Name
+    Value: !Ref OrdersTable
+    
+  UsersTableName:
+    Description: Users DynamoDB Table Name
+    Value: !Ref UsersTable

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Shiv Tirth Wada</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .orders-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .orders-header h1 {
+            color: #ff6b35;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .order-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .order-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+        }
+
+        .status-preparing {
+            background: linear-gradient(135deg, #cce5ff, #74b9ff);
+            color: #004085;
+        }
+
+        .status-out-for-delivery {
+            background: linear-gradient(135deg, #d1ecf1, #81ecec);
+            color: #0c5460;
+        }
+
+        .status-delivered {
+            background: linear-gradient(135deg, #d4edda, #55efc4);
+            color: #155724;
+        }
+
+        .order-details {
+            margin: 1rem 0;
+        }
+
+        .order-details p {
+            margin: 0.5rem 0;
+            color: #666;
+        }
+
+        .order-items {
+            background: linear-gradient(135deg, #f9f9f9, #ffffff);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .order-items h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ff6b35;
+            text-align: right;
+            margin-top: 1rem;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .no-orders h2 {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #ff6b35;
+            font-size: 1.2rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+                position: absolute;
+                right: 1rem;
+                top: 1rem;
+            }
+            
+            nav {
+                position: relative;
+                flex-direction: column;
+            }
+            
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: rgba(0, 0, 0, 0.95);
+                position: absolute;
+                top: 100%;
+                left: 0;
+                padding: 1rem;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .orders-container {
+                padding: 1rem;
+            }
+            
+            .orders-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .orders-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .back-btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .order-card {
+                padding: 1rem;
+            }
+            
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .order-id {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .orders-header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .order-item {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="images/logo.png" alt="Shiv Tirth Wada Logo" class="logo-img">
+                <span data-translate="restaurantName">Shiv Tirth Wada</span>
+            </div>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html" data-translate="menu">Home</a></li>
+                <li><a href="index.html#menu" data-translate="menu">Menu</a></li>
+                <li><a href="my-orders.html" class="active" data-translate="myOrders">My Orders</a></li>
+                <li><button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">मराठी</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="orders-container">
+        <div class="orders-header">
+            <h1 data-translate="myOrdersTitle">My Orders</h1>
+            <a href="index.html" class="back-btn" data-translate="backToMenuBtn">← Back to Menu</a>
+        </div>
+
+        <div id="orders-list">
+            <div class="loading" data-translate="loadingOrders">Loading your orders...</div>
+        </div>
+    </div>
+
+    <script src="js/translations.js"></script>
+    <script src="js/my-orders.js"></script>
+</body>
+</html>

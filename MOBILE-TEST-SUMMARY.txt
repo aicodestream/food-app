@@ -1,0 +1,113 @@
+╔════════════════════════════════════════════════════════════════╗
+║          MOBILE TESTING - QUICK REFERENCE                      ║
+╚════════════════════════════════════════════════════════════════╝
+
+📱 THREE WAYS TO TEST ON MOBILE:
+
+┌────────────────────────────────────────────────────────────────┐
+│ METHOD 1: Cloudflare Tunnel (EASIEST - No Signup!)            │
+└────────────────────────────────────────────────────────────────┘
+
+  1. Install cloudflared (one-time):
+     Windows: choco install cloudflared
+     Mac: brew install cloudflare/cloudflare/cloudflared
+
+  2. Start server:
+     cd food-ordering-website/aws
+     node local-server.js
+
+  3. Start tunnel (new terminal):
+     cloudflared tunnel --url http://localhost:3001
+
+  4. Copy the https://xxx.trycloudflare.com URL
+  5. Open on mobile!
+
+  ✅ Works anywhere (any network)
+  ✅ HTTPS enabled
+  ✅ No signup required
+
+
+┌────────────────────────────────────────────────────────────────┐
+│ METHOD 2: Local WiFi (FASTEST - No Installation!)             │
+└────────────────────────────────────────────────────────────────┘
+
+  1. Find your IP:
+     Windows: ipconfig
+     Mac/Linux: ifconfig
+
+  2. Start server:
+     cd food-ordering-website/aws
+     node local-server.js
+
+  3. Open on mobile (same WiFi):
+     http://YOUR_IP:3001
+     Example: http://192.168.1.100:3001
+
+  ✅ No installation needed
+  ✅ Very fast
+  ⚠️  Must be on same WiFi
+
+
+┌────────────────────────────────────────────────────────────────┐
+│ METHOD 3: ngrok (MOST RELIABLE - Requires Signup)             │
+└────────────────────────────────────────────────────────────────┘
+
+  1. Install: npm install -g ngrok
+  2. Signup: https://ngrok.com/signup
+  3. Auth: ngrok config add-authtoken YOUR_TOKEN
+  4. Start: ngrok http 3001
+  5. Use the https://xxx.ngrok.io URL
+
+  ✅ Most stable
+  ✅ Traffic inspection
+  ✅ Can keep same URL
+
+
+╔════════════════════════════════════════════════════════════════╗
+║                    HELPER SCRIPTS                              ║
+╚════════════════════════════════════════════════════════════════╝
+
+  Windows:
+    .\start-tunnel.ps1    - Interactive menu
+    .\show-ip.ps1         - Show your local IP
+
+  Mac/Linux:
+    ./start-tunnel.sh     - Interactive menu
+
+
+╔════════════════════════════════════════════════════════════════╗
+║                  TESTING CHECKLIST                             ║
+╚════════════════════════════════════════════════════════════════╝
+
+  □ Homepage loads
+  □ Hamburger menu (☰) works
+  □ Language switcher (मराठी ↔ English)
+  □ Menu items display
+  □ Add to cart
+  □ Cart page
+  □ Checkout form
+  □ Place order
+  □ My Orders page
+  □ Login/Signup
+  □ Touch gestures smooth
+  □ No zoom on input focus
+
+
+╔════════════════════════════════════════════════════════════════╗
+║                   NEED HELP?                                   ║
+╚════════════════════════════════════════════════════════════════╝
+
+  📖 Detailed Guide: MOBILE-TESTING.md
+  ⚡ Quick Start: QUICK-MOBILE-TEST.md
+
+  Common Issues:
+  - Server not running → Start with: node local-server.js
+  - Can't connect → Check firewall/WiFi
+  - Tunnel fails → Try different method
+
+═══════════════════════════════════════════════════════════════════
+
+🎉 RECOMMENDED: Start with Cloudflare Tunnel (Method 1)
+   It's free, no signup, and works everywhere!
+
+═══════════════════════════════════════════════════════════════════

@@ -1,0 +1,26 @@
+[
+  {
+    "ParameterKey": "TwilioAccountSid",
+    "ParameterValue": "YOUR_TWILIO_ACCOUNT_SID"
+  },
+  {
+    "ParameterKey": "TwilioAuthToken", 
+    "ParameterValue": "YOUR_TWILIO_AUTH_TOKEN"
+  },
+  {
+    "ParameterKey": "TwilioWhatsAppNumber",
+    "ParameterValue": "whatsapp:+14155238886"
+  },
+  {
+    "ParameterKey": "TwilioSmsNumber",
+    "ParameterValue": "YOUR_TWILIO_SMS_NUMBER"
+  },
+  {
+    "ParameterKey": "RestaurantWhatsAppNumber",
+    "ParameterValue": "whatsapp:+919766007557"
+  },
+  {
+    "ParameterKey": "RestaurantSmsNumber",
+    "ParameterValue": "+919766007557"
+  }
+]

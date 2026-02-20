@@ -1,0 +1,28 @@
+// Indian Restaurant Menu Data
+const menuData = {
+    appetizers: [
+        { id: 1, name: "Paneer Tikka", nameMr: "पनीर टिक्का", price: 249, description: "Grilled cottage cheese with spices", descriptionMr: "मसाल्यांसह ग्रील्ड पनीर", image: "🧀" },
+        { id: 2, name: "Samosa (2 pcs)", nameMr: "समोसा (२ पीस)", price: 49, description: "Crispy pastry with potato filling", descriptionMr: "बटाट्याची भरलेली कुरकुरीत पेस्ट्री", image: "🥟" },
+        { id: 3, name: "Chicken 65", nameMr: "चिकन ६५", price: 299, description: "Spicy fried chicken appetizer", descriptionMr: "मसालेदार तळलेले चिकन", image: "🍗" }
+    ],
+    "main-courses": [
+        { id: 4, name: "Chicken Thali", nameMr: "चिकन थाळी", price: 349, description: "Complete meal with chicken curry, rice, roti, dal, and sides", descriptionMr: "चिकन करी, भात, रोटी, डाळ आणि भाजी सह संपूर्ण जेवण", image: "images/chicken-thali.jfif" },
+        { id: 5, name: "Mutton Thali", nameMr: "मटण थाळी", price: 449, description: "Complete meal with mutton curry, rice, roti, dal, and sides", descriptionMr: "मटण करी, भात, रोटी, डाळ आणि भाजी सह संपूर्ण जेवण", image: "images/mutton-thalli.jfif" },
+        { id: 6, name: "Veg Thali", nameMr: "वेज थाळी", price: 249, description: "Complete vegetarian meal with curry, rice, roti, dal, and sides", descriptionMr: "भाजी, भात, रोटी, डाळ सह संपूर्ण शाकाहारी जेवण", image: "🍛" },
+        { id: 7, name: "Chicken Biryani", nameMr: "चिकन बिर्याणी", price: 299, description: "Aromatic basmati rice with spiced chicken", descriptionMr: "मसालेदार चिकन सह सुगंधी बासमती तांदूळ", image: "🍚" },
+        { id: 8, name: "Jeera Rice", nameMr: "जिरे भात", price: 149, description: "Cumin flavored basmati rice", descriptionMr: "जिरे चवीचे बासमती तांदूळ", image: "images/jira-rice.jfif" },
+        { id: 9, name: "Butter Chicken", nameMr: "बटर चिकन", price: 329, description: "Creamy tomato-based chicken curry", descriptionMr: "मलईदार टोमॅटो बेस चिकन करी", image: "🍛" },
+        { id: 10, name: "Dal Makhani", nameMr: "दाल मखनी", price: 199, description: "Creamy black lentils with butter", descriptionMr: "लोणीसह मलईदार काळी डाळ", image: "🍲" }
+    ],
+    desserts: [
+        { id: 11, name: "Gulab Jamun (3 pcs)", nameMr: "गुलाब जामुन (३ पीस)", price: 99, description: "Sweet milk dumplings in sugar syrup", descriptionMr: "साखरेच्या पाकात गोड दुधाचे गोळे", image: "🍡" },
+        { id: 12, name: "Rasgulla (3 pcs)", nameMr: "रसगुल्ला (३ पीस)", price: 99, description: "Soft cottage cheese balls in syrup", descriptionMr: "पाकात मऊ पनीर गोळे", image: "🍡" },
+        { id: 13, name: "Kulfi", nameMr: "कुल्फी", price: 79, description: "Traditional Indian ice cream", descriptionMr: "पारंपारिक भारतीय आईस्क्रीम", image: "🍨" }
+    ],
+    beverages: [
+        { id: 14, name: "Sweet Lassi", nameMr: "गोड लस्सी", price: 79, description: "Chilled yogurt drink", descriptionMr: "थंड दह्याचे पेय", image: "🥛" },
+        { id: 15, name: "Masala Chai", nameMr: "मसाला चहा", price: 39, description: "Spiced Indian tea", descriptionMr: "मसालेदार भारतीय चहा", image: "☕" },
+        { id: 16, name: "Fresh Lime Soda", nameMr: "ताजा लिंबू सोडा", price: 49, description: "Refreshing lime drink", descriptionMr: "ताजेतवाने लिंबू पेय", image: "🍋" }
+    ]
+};
+

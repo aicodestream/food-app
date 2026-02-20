@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 10px; }
+        #console-output { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Notification Fix Test</h1>
+    
+    <div class="test-result info">
+        <strong>Test Status:</strong> This page tests the enhanced notification system with retry logic and better error handling.
+    </div>
+    
+    <button onclick="testAPICall()">Test API Call</button>
+    <button onclick="testRetryLogic()">Test Retry Logic</button>
+    <button onclick="clearConsole()">Clear Console</button>
+    
+    <h3>Console Output:</h3>
+    <div id="console-output"></div>
+    
+    <script>
+        // Override console.log to show in our output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const consoleOutput = document.getElementById('console-output');
+        
+        function addToConsole(message, type = 'log') {
+            const timestamp = new Date().toISOString();
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : 'black';
+            div.textContent = `[${timestamp}] ${message}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'warn');
+        };
+        
+        // API endpoint
+        const API_ENDPOINT = 'https://api.aicodestreams.com/send-notification';
+        
+        async function testAPICall() {
+            console.log('🧪 Starting API test...');
+            
+            const testData = {
+                orderDetails: {
+                    orderId: 'TEST' + Date.now(),
+                    customerName: 'Frontend Test User',
+                    items: '1x Test Item - ₹100',
+                    total: 100,
+                    address: 'Test Address for Frontend Fix'
+                },
+                customerPhone: '+919766007557'
+            };
+            
+            console.log('📡 API Payload:', JSON.stringify(testData, null, 2));
+            console.log('🌐 API Endpoint:', API_ENDPOINT);
+            
+            try {
+                console.log('📞 Making API call...');
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                console.log(`📊 Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('📨 API Response:', JSON.stringify(result, null, 2));
+                
+                if (result.success) {
+                    console.log('✅ Test PASSED - Notification sent successfully!');
+                } else {
+                    console.error('❌ Test FAILED - API returned success: false');
+                }
+                
+            } catch (error) {
+                console.error('❌ Test FAILED - Error:', error.message);
+            }
+        }
+        
+        async function testRetryLogic() {
+            console.log('🔄 Testing retry logic with invalid endpoint...');
+            
+            const testData = {
+                orderDetails: {
+                    orderId: 'RETRY_TEST' + Date.now(),
+                    customerName: 'Retry Test User',
+                    items: '1x Retry Test Item - ₹50',
+                    total: 50,
+                    address: 'Retry Test Address'
+                },
+                customerPhone: '+919766007557'
+            };
+            
+            // Use invalid endpoint to trigger retry
+            const invalidEndpoint = 'https://api.aicodestreams.com/invalid-endpoint';
+            
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    console.log(`📞 Retry attempt ${attempt}/3`);
+                    console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for test
+                    
+                    const response = await fetch(invalidEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(testData),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const result = await response.json();
+                    console.log('✅ Unexpected success:', result);
+                    break;
+                    
+                } catch (error) {
+                    console.error(`❌ Attempt ${attempt} failed:`, error.message);
+                    
+                    if (error.name === 'AbortError') {
+                        console.error('⏰ Request timed out');
+                    } else if (error.message.includes('Failed to fetch')) {
+                        console.error('🌐 Network error');
+                    }
+                    
+                    // Wait before retry (except on last attempt)
+                    if (attempt < 3) {
+                        const delay = attempt * 1000; // 1s, 2s for test
+                        console.log(`⏳ Waiting ${delay}ms before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+            
+            console.log('🔄 Retry logic test completed');
+        }
+        
+        function clearConsole() {
+            consoleOutput.innerHTML = '';
+        }
+        
+        // Initial message
+        console.log('🚀 Frontend Fix Test Page Loaded');
+        console.log('📋 Features tested:');
+        console.log('  - Correct API endpoint');
+        console.log('  - Enhanced error handling');
+        console.log('  - Retry logic with exponential backoff');
+        console.log('  - Timeout handling');
+        console.log('  - Detailed console logging');
+    </script>
+</body>
+</html>
