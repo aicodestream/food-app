@@ -1,5 +1,13 @@
 // Indian Restaurant Menu Data
 const menuData = {
+    starters: [
+        { id: 101, name: "Veg Spring Roll", nameMr: "वेज स्प्रिंग रोल", price: 129, description: "Crispy rolls with mixed vegetables", descriptionMr: "मिश्र भाज्यांसह कुरकुरीत रोल", image: "🥢" },
+        { id: 102, name: "Chicken Wings", nameMr: "चिकन विंग्स", price: 249, description: "Spicy fried chicken wings", descriptionMr: "मसालेदार तळलेले चिकन विंग्स", image: "🍗" },
+        { id: 103, name: "Paneer Pakoda", nameMr: "पनीर पकोडा", price: 149, description: "Deep fried cottage cheese fritters", descriptionMr: "तळलेले पनीर पकोडे", image: "🧀" },
+        { id: 104, name: "Veg Manchurian", nameMr: "वेज मंचुरियन", price: 169, description: "Indo-Chinese vegetable balls in sauce", descriptionMr: "सॉसमध्ये भाजीचे गोळे", image: "🥘" },
+        { id: 105, name: "Chicken Lollipop", nameMr: "चिकन लॉलीपॉप", price: 279, description: "Spicy chicken drumsticks", descriptionMr: "मसालेदार चिकन ड्रमस्टिक", image: "🍗" },
+        { id: 106, name: "Hara Bhara Kabab", nameMr: "हरा भरा कबाब", price: 139, description: "Green vegetable patties", descriptionMr: "हिरव्या भाज्यांचे पॅटीज", image: "🥬" }
+    ],
     appetizers: [
         { id: 1, name: "Paneer Tikka", nameMr: "पनीर टिक्का", price: 249, description: "Grilled cottage cheese with spices", descriptionMr: "मसाल्यांसह ग्रील्ड पनीर", image: "🧀" },
         { id: 2, name: "Samosa (2 pcs)", nameMr: "समोसा (२ पीस)", price: 49, description: "Crispy pastry with potato filling", descriptionMr: "बटाट्याची भरलेली कुरकुरीत पेस्ट्री", image: "🥟" },

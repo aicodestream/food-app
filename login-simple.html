@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Shiv Tirth Wada</title>
+    <link rel="stylesheet" href="css/login.css">
+    <style>
+        .simple-login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-header h1 {
+            color: #C62828;
+            margin-bottom: 0.5rem;
+        }
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #C62828;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #C62828;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-btn:hover {
+            background: #B71C1C;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .back-link a {
+            color: #C62828;
+            text-decoration: none;
+        }
+        .message {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="simple-login-container">
+        <div class="login-header">
+            <h1>📱 Quick Login</h1>
+            <p>Shiv Tirth Wada - Enter your phone number</p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    placeholder="Enter your name"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    placeholder="Enter 10-digit phone number"
+                    pattern="[0-9]{10}"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="login-btn">
+                Continue to Order
+            </button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Validate phone number
+            if (!/^[0-9]{10}$/.test(phone)) {
+                messageDiv.textContent = 'Please enter a valid 10-digit phone number';
+                messageDiv.className = 'message error';
+                return;
+            }
+            
+            // Store user data in localStorage
+            const user = {
+                name: name,
+                phone: '+91' + phone,
+                loginTime: new Date().toISOString()
+            };
+            
+            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('userPhone', user.phone);
+            
+            // Show success message
+            messageDiv.textContent = 'Login successful! Redirecting...';
+            messageDiv.className = 'message success';
+            
+            // Redirect to main page
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const user = localStorage.getItem('user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    if (userData.phone) {
+                        console.log('User already logged in, redirecting...');
+                        window.location.href = 'index.html';
+                    }
+                } catch (e) {
+                    console.error('Invalid user data');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

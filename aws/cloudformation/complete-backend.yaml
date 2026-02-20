@@ -1,0 +1,237 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Food Ordering Website - Complete Backend with Notifications and OTP Auth
+
+Parameters:
+  TwilioAccountSid:
+    Type: String
+    Description: Twilio Account SID
+    NoEcho: true
+  
+  TwilioAuthToken:
+    Type: String
+    Description: Twilio Auth Token
+    NoEcho: true
+  
+  TwilioWhatsAppNumber:
+    Type: String
+    Description: Twilio WhatsApp Number (format whatsapp:+14155238886)
+    Default: whatsapp:+14155238886
+  
+  TwilioSmsNumber:
+    Type: String
+    Description: Twilio SMS Number (format +18287981553)
+    Default: +18287981553
+  
+  RestaurantWhatsAppNumber:
+    Type: String
+    Description: Restaurant WhatsApp Number to receive orders (format whatsapp:+919766007557)
+
+Resources:
+  # Lambda Execution Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: food-ordering-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: LambdaLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*
+
+  # Notification Lambda Function
+  NotificationFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-notifications
+      Runtime: nodejs18.x
+      Handler: enhanced-lambda.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            return {
+              statusCode: 200,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST,OPTIONS',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: 'Placeholder - update with actual code' })
+            };
+          };
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
+          TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
+          TWILIO_WHATSAPP_NUMBER: !Ref TwilioWhatsAppNumber
+          TWILIO_SMS_NUMBER: !Ref TwilioSmsNumber
+          RESTAURANT_WHATSAPP_NUMBER: !Ref RestaurantWhatsAppNumber
+
+  # OTP Authentication Lambda Function
+  OtpAuthFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-otp-auth
+      Runtime: nodejs18.x
+      Handler: auth-otp.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            return {
+              statusCode: 200,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST,OPTIONS',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: 'Placeholder - update with actual code' })
+            };
+          };
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
+          TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
+          TWILIO_SMS_NUMBER: !Ref TwilioSmsNumber
+          NODE_ENV: production
+
+  # CloudWatch Log Groups
+  NotificationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${NotificationFunction}
+      RetentionInDays: 7
+
+  OtpAuthLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${OtpAuthFunction}
+      RetentionInDays: 7
+
+  # API Gateway HTTP API
+  ApiGateway:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: food-ordering-api
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - '*'
+
+  # API Gateway Integrations
+  NotificationIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGateway
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt NotificationFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  OtpAuthIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGateway
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt OtpAuthFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  # API Gateway Routes
+  NotificationRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      RouteKey: POST /send-notification
+      Target: !Sub integrations/${NotificationIntegration}
+
+  SendOtpRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      RouteKey: POST /auth/send-otp
+      Target: !Sub integrations/${OtpAuthIntegration}
+
+  VerifyOtpRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      RouteKey: POST /auth/verify-otp
+      Target: !Sub integrations/${OtpAuthIntegration}
+
+  # API Gateway Stage
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref ApiGateway
+      StageName: $default
+      AutoDeploy: true
+
+  # Lambda Permissions for API Gateway
+  NotificationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref NotificationFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*
+
+  OtpAuthPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref OtpAuthFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !GetAtt ApiGateway.ApiEndpoint
+    Export:
+      Name: FoodOrderingApiEndpoint
+  
+  NotificationFunctionArn:
+    Description: Notification Lambda Function ARN
+    Value: !GetAtt NotificationFunction.Arn
+    Export:
+      Name: FoodOrderingNotificationFunctionArn
+  
+  OtpAuthFunctionArn:
+    Description: OTP Auth Lambda Function ARN
+    Value: !GetAtt OtpAuthFunction.Arn
+    Export:
+      Name: FoodOrderingOtpAuthFunctionArn
+  
+  ApiId:
+    Description: API Gateway ID
+    Value: !Ref ApiGateway
+    Export:
+      Name: FoodOrderingApiId
