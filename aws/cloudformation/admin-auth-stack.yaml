@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Admin Authentication Stack for Food Ordering App'
+
+Parameters:
+  ApiGatewayId:
+    Type: String
+    Default: ewbzhkjb20
+    Description: API Gateway ID for food-ordering-api
+
+Resources:
+  # Lambda Function for Admin Login
+  AdminLoginFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: food-ordering-admin-login
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt AdminLoginRole.Arn
+      Timeout: 10
+      Environment:
+        Variables:
+          ADMIN_SECRET_NAME: food-ordering-admin-password
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            return {
+              statusCode: 200,
+              body: JSON.stringify({ message: 'Placeholder - deploy actual code' })
+            };
+          };
+
+  # IAM Role for Admin Login Lambda
+  AdminLoginRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: food-ordering-admin-login-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:food-ordering-admin-password-*'
+
+  # API Gateway HTTP API Integration
+  AdminLoginIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGatewayId
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AdminLoginFunction}'
+      PayloadFormatVersion: '2.0'
+
+  # POST /admin-login route
+  AdminLoginRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGatewayId
+      RouteKey: 'POST /admin-login'
+      Target: !Sub 'integrations/${AdminLoginIntegration}'
+
+  # POST /admin-verify route
+  AdminVerifyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGatewayId
+      RouteKey: 'POST /admin-verify'
+      Target: !Sub 'integrations/${AdminLoginIntegration}'
+
+  # Lambda Permission for API Gateway
+  AdminLoginPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AdminLoginFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*'
+
+Outputs:
+  AdminLoginFunctionArn:
+    Description: Admin Login Lambda Function ARN
+    Value: !GetAtt AdminLoginFunction.Arn
+    Export:
+      Name: AdminLoginFunctionArn

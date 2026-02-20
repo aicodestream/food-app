@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CORS</title>
+</head>
+<body>
+    <h1>Test Order Status Update</h1>
+    <button onclick="testUpdate()">Update Order Status</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testUpdate() {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('https://api.aicodestreams.com/orders/ORD08745460/status', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status: 'Preparing' })
+                });
+                
+                const data = await response.json();
+                result.textContent = `Success!\nStatus: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

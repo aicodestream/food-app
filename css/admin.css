@@ -460,3 +460,321 @@ main {
 .visitor-card p {
     color: #4CAF50;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    /* Header */
+    header {
+        padding: 1.5rem 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    /* Main Container */
+    main {
+        padding: 0 1rem;
+        margin: 1rem auto;
+    }
+    
+    /* Stats Grid */
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 0.85rem;
+    }
+    
+    .stat-card p {
+        font-size: 1.8rem;
+    }
+    
+    /* Tabs */
+    .tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Orders Section */
+    .orders-section {
+        padding: 1rem;
+    }
+    
+    .orders-section h2 {
+        font-size: 1.3rem;
+    }
+    
+    /* Order Cards */
+    .order-card {
+        padding: 1rem;
+    }
+    
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .order-id {
+        font-size: 1rem;
+    }
+    
+    .status {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    
+    .order-details p {
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+    
+    .order-items {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Status Controls */
+    .status-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .status-btn {
+        width: 100%;
+        padding: 0.7rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Analytics Section */
+    .analytics-section {
+        padding: 1rem;
+    }
+    
+    .analytics-section h2 {
+        font-size: 1.3rem;
+    }
+    
+    .analytics-filters {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-group input[type="date"] {
+        width: 100%;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .filter-group .btn {
+        width: 100%;
+        margin-top: 0.5rem;
+        margin-right: 0;
+    }
+    
+    /* Analytics Card */
+    .analytics-card {
+        padding: 1rem;
+    }
+    
+    .analytics-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .analytics-card h4 {
+        font-size: 1rem;
+    }
+    
+    /* Stats Grid in Analytics */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        padding: 1rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    /* Stats Table */
+    .stats-table {
+        font-size: 0.85rem;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .stats-table thead {
+        display: none;
+    }
+    
+    .stats-table tbody {
+        display: block;
+    }
+    
+    .stats-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1rem;
+        background: white;
+    }
+    
+    .stats-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .stats-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .stats-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #666;
+    }
+    
+    /* Buttons */
+    .btn {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card p {
+        font-size: 1.5rem;
+    }
+    
+    .order-id {
+        font-size: 0.9rem;
+    }
+    
+    .analytics-card h3 {
+        font-size: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 1.3rem;
+    }
+}
+
+/* Tablet Responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .analytics-filters {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Landscape Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    header {
+        padding: 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .tab-btn,
+    .status-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .stat-card {
+        cursor: pointer;
+    }
+}
+
+/* Prevent text selection on interactive elements */
+.btn,
+.tab-btn,
+.status-btn,
+.stat-card {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for iOS input zoom */
+@media screen and (max-width: 768px) {
+    input[type="date"],
+    input[type="text"],
+    input[type="password"],
+    select {
+        font-size: 16px !important;
+    }
+}
+
+/* Logout Button Mobile */
+@media (max-width: 768px) {
+    .btn.logout-btn {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        width: auto;
+        padding: 0.8rem 1.5rem;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+}

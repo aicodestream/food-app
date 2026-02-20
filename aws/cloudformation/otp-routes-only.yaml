@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Add OTP Authentication Routes to Existing API Gateway
+
+Parameters:
+  TwilioAccountSid:
+    Type: String
+    Description: Twilio Account SID
+    NoEcho: true
+  
+  TwilioAuthToken:
+    Type: String
+    Description: Twilio Auth Token
+    NoEcho: true
+  
+  TwilioSmsNumber:
+    Type: String
+    Description: Twilio SMS Number
+    Default: +18287981553
+
+Resources:
+  # IAM Role for Lambda
+  DummyLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: dummy-food-ordering-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: LambdaLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*
+
+  # OTP Authentication Lambda Function (with dummy prefix to avoid conflicts)
+  DummyOtpAuthFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: DummyLambdaExecutionRole
+    Properties:
+      FunctionName: dummy-food-ordering-otp-auth
+      Runtime: nodejs18.x
+      Handler: auth-otp.handler
+      Role: !GetAtt DummyLambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            return {
+              statusCode: 200,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST,OPTIONS',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: 'Placeholder - update with actual code' })
+            };
+          };
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
+          TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
+          TWILIO_SMS_NUMBER: !Ref TwilioSmsNumber
+          NODE_ENV: production
+
+  # CloudWatch Log Group
+  DummyOtpAuthLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${DummyOtpAuthFunction}
+      RetentionInDays: 7
+
+  # API Gateway Integration (use existing API ewbzhkjb20)
+  DummyOtpAuthIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: ewbzhkjb20
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt DummyOtpAuthFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  # API Gateway Routes
+  DummySendOtpRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: POST /auth/send-otp
+      Target: !Sub integrations/${DummyOtpAuthIntegration}
+
+  DummyVerifyOtpRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: ewbzhkjb20
+      RouteKey: POST /auth/verify-otp
+      Target: !Sub integrations/${DummyOtpAuthIntegration}
+
+  # Lambda Permission for API Gateway
+  DummyOtpAuthPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref DummyOtpAuthFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:ewbzhkjb20/*/*
+
+Outputs:
+  DummyOtpAuthFunctionArn:
+    Description: OTP Auth Lambda Function ARN
+    Value: !GetAtt DummyOtpAuthFunction.Arn
+    Export:
+      Name: DummyFoodOrderingOtpAuthFunctionArn
+  
+  DummyOtpAuthFunctionName:
+    Description: OTP Auth Lambda Function Name
+    Value: !Ref DummyOtpAuthFunction
+    Export:
+      Name: DummyFoodOrderingOtpAuthFunctionName

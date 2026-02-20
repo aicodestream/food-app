@@ -2,7 +2,7 @@
 const translations = {
     en: {
         // Restaurant Name
-        restaurantName: "Shiv Tirth Wada",
+        restaurantName: "Shivtirth Wada",
         
         // Navigation
         menu: "Menu",
@@ -15,10 +15,9 @@ const translations = {
         orderNow: "Order Now",
         
         // Menu Categories
-        appetizers: "🥟 Appetizers",
+        starters: "🌶️ Starters",
         mainCourses: "🍛 Main Courses",
         desserts: "🍰 Desserts",
-        beverages: "🥤 Beverages",
         
         // Menu Section
         ourMenu: "Our Menu",
@@ -89,10 +88,9 @@ const translations = {
         orderNow: "आता ऑर्डर करा",
         
         // Menu Categories
-        appetizers: "🥟 स्टार्टर्स",
+        starters: "🌶️ स्टार्टर्स",
         mainCourses: "🍛 मुख्य पदार्थ",
         desserts: "🍰 मिठाई",
-        beverages: "🥤 पेये",
         
         // Menu Section
         ourMenu: "आमचा मेनू",

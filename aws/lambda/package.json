@@ -1,9 +1,10 @@
 {
-  "name": "food-ordering-lambda",
+  "name": "food-ordering-notifications",
   "version": "1.0.0",
-  "description": "Lambda function for WhatsApp notifications",
-  "main": "send-whatsapp.js",
+  "description": "Notification Lambda for food ordering app",
+  "main": "index.js",
   "dependencies": {
-    "twilio": "^5.3.5"
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
   }
 }

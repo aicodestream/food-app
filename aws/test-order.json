@@ -1,0 +1,17 @@
+{
+  "orderDetails": {
+    "orderId": "TEST123",
+    "customerName": "Test Customer",
+    "items": "1x Test Item - ₹100",
+    "itemsArray": [
+      {
+        "name": "Test Item",
+        "quantity": 1,
+        "total": 100
+      }
+    ],
+    "total": 100,
+    "address": "Test Address, Pune"
+  },
+  "customerPhone": "8668909382"
+}
