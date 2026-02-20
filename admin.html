@@ -76,21 +76,6 @@
                 </div>
             </div>
 
-            <div class="stats" style="margin-top: 2rem;">
-                <div class="stat-card visitor-card">
-                    <h3>👥 Today's Visitors</h3>
-                    <p id="today-visitors">0</p>
-                </div>
-                <div class="stat-card visitor-card">
-                    <h3>📄 Today's Page Views</h3>
-                    <p id="today-pageviews">0</p>
-                </div>
-                <div class="stat-card visitor-card">
-                    <h3>🌐 Total Visitors</h3>
-                    <p id="total-visitors">0</p>
-                </div>
-            </div>
-
             <div class="orders-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h2 id="orders-title">All Orders</h2>
@@ -103,32 +88,6 @@
         <div id="analytics-tab" class="tab-content">
             <div class="analytics-section">
                 <h2>📊 Analytics & Reports</h2>
-                
-                <!-- Visitor Analytics Section -->
-                <div class="analytics-card">
-                    <h3>👥 Visitor Analytics</h3>
-                    <div class="analytics-filters">
-                        <div class="filter-group">
-                            <label>Select Date Range</label>
-                            <input type="date" id="visitor-start-date" class="date-input">
-                            <span style="margin: 0 0.5rem;">to</span>
-                            <input type="date" id="visitor-end-date" class="date-input">
-                            <button class="btn btn-primary" onclick="loadVisitorStats()">📈 Load Visitor Stats</button>
-                        </div>
-                        
-                        <div class="filter-group">
-                            <label>Quick Filters</label>
-                            <button class="btn btn-secondary" onclick="loadVisitorStatsToday()">Today</button>
-                            <button class="btn btn-secondary" onclick="loadVisitorStatsYesterday()">Yesterday</button>
-                            <button class="btn btn-secondary" onclick="loadVisitorStatsWeek()">Last 7 Days</button>
-                            <button class="btn btn-secondary" onclick="loadVisitorStatsMonth()">Last 30 Days</button>
-                        </div>
-                    </div>
-                    
-                    <div id="visitor-analytics-results" class="analytics-results">
-                        <p class="placeholder-text">Select a date range to view visitor statistics</p>
-                    </div>
-                </div>
                 
                 <!-- Order Analytics Section -->
                 <div class="analytics-card">

@@ -9,9 +9,7 @@ let currentFilter = 'all'; // Track current filter
 // Load orders on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadOrders();
-    loadVisitorStatsCards();
     setInterval(loadOrders, 30000); // Auto-refresh every 30 seconds
-    setInterval(loadVisitorStatsCards, 60000); // Refresh visitor stats every minute
 });
 
 // Load orders from backend or localStorage
@@ -429,24 +427,6 @@ async function loadCustomerBilling() {
 }
 
 
-// Load visitor statistics for dashboard cards
-async function loadVisitorStatsCards() {
-    try {
-        // For now, set to 0 until visitor tracking endpoints are fully implemented
-        document.getElementById('today-visitors').textContent = '0';
-        document.getElementById('today-pageviews').textContent = '0';
-        document.getElementById('total-visitors').textContent = '0';
-        
-        console.log('Visitor stats: Endpoints not yet implemented');
-    } catch (error) {
-        console.error('Error loading visitor stats:', error);
-        document.getElementById('today-visitors').textContent = '0';
-        document.getElementById('today-pageviews').textContent = '0';
-        document.getElementById('total-visitors').textContent = '0';
-    }
-}
-
-
 // Admin logout function
 function adminLogout() {
     if (confirm('Are you sure you want to logout?')) {
@@ -456,139 +436,6 @@ function adminLogout() {
     }
 }
 
-
-// ==================== VISITOR ANALYTICS FUNCTIONS ====================
-
-// Load visitor stats for a date range
-async function loadVisitorStats() {
-    const startDate = document.getElementById('visitor-start-date').value;
-    const endDate = document.getElementById('visitor-end-date').value;
-    
-    const resultsDiv = document.getElementById('visitor-analytics-results');
-    
-    if (!startDate || !endDate) {
-        resultsDiv.innerHTML = '<p class="placeholder-text" style="color: #e74c3c;">⚠️ Please select both start and end dates</p>';
-        return;
-    }
-    
-    resultsDiv.innerHTML = '<p class="placeholder-text">Loading visitor statistics...</p>';
-    
-    try {
-        const response = await fetch(`${API_BASE}/visitor-tracking?startDate=${startDate}&endDate=${endDate}`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to load visitor stats');
-        }
-        
-        const data = await response.json();
-        displayVisitorStats(data, startDate, endDate);
-    } catch (error) {
-        console.error('Error loading visitor stats:', error);
-        resultsDiv.innerHTML = `<p class="placeholder-text" style="color: #e74c3c;">Error loading visitor statistics. Please try again.</p>`;
-    }
-}
-
-// Display visitor statistics
-function displayVisitorStats(data, startDate, endDate) {
-    const resultsDiv = document.getElementById('visitor-analytics-results');
-    
-    // Calculate totals
-    const totalVisitors = data.visitors || 0;
-    const totalPageViews = data.pageViews || 0;
-    const avgPageViewsPerVisitor = totalVisitors > 0 ? (totalPageViews / totalVisitors).toFixed(2) : 0;
-    const dateRange = `${formatDate(startDate)} to ${formatDate(endDate)}`;
-    
-    let html = `
-        <div class="visitor-stats-grid">
-            <div class="visitor-stat-card">
-                <h4>👥 Total Visitors</h4>
-                <div class="stat-value">${totalVisitors}</div>
-                <div class="stat-label">${dateRange}</div>
-            </div>
-            <div class="visitor-stat-card">
-                <h4>📄 Total Page Views</h4>
-                <div class="stat-value">${totalPageViews}</div>
-                <div class="stat-label">${dateRange}</div>
-            </div>
-            <div class="visitor-stat-card">
-                <h4>📊 Avg Views/Visitor</h4>
-                <div class="stat-value">${avgPageViewsPerVisitor}</div>
-                <div class="stat-label">Pages per visitor</div>
-            </div>
-        </div>
-    `;
-    
-    // Add daily breakdown if available
-    if (data.dailyStats && data.dailyStats.length > 0) {
-        html += `
-            <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #333;">📅 Daily Breakdown</h4>
-            <table class="visitor-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Visitors</th>
-                        <th>Page Views</th>
-                        <th>Avg Views/Visitor</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
-        data.dailyStats.forEach(day => {
-            const avgViews = day.visitors > 0 ? (day.pageViews / day.visitors).toFixed(2) : 0;
-            html += `
-                <tr>
-                    <td>${formatDate(day.date)}</td>
-                    <td>${day.visitors}</td>
-                    <td>${day.pageViews}</td>
-                    <td>${avgViews}</td>
-                </tr>
-            `;
-        });
-        
-        html += `
-                </tbody>
-            </table>
-        `;
-    }
-    
-    resultsDiv.innerHTML = html;
-}
-
-// Quick filter functions for visitor stats
-function loadVisitorStatsToday() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('visitor-start-date').value = today;
-    document.getElementById('visitor-end-date').value = today;
-    loadVisitorStats();
-}
-
-function loadVisitorStatsYesterday() {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-    document.getElementById('visitor-start-date').value = yesterdayStr;
-    document.getElementById('visitor-end-date').value = yesterdayStr;
-    loadVisitorStats();
-}
-
-function loadVisitorStatsWeek() {
-    const today = new Date();
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    document.getElementById('visitor-start-date').value = weekAgo.toISOString().split('T')[0];
-    document.getElementById('visitor-end-date').value = today.toISOString().split('T')[0];
-    loadVisitorStats();
-}
-
-function loadVisitorStatsMonth() {
-    const today = new Date();
-    const monthAgo = new Date();
-    monthAgo.setDate(monthAgo.getDate() - 30);
-    document.getElementById('visitor-start-date').value = monthAgo.toISOString().split('T')[0];
-    document.getElementById('visitor-end-date').value = today.toISOString().split('T')[0];
-    loadVisitorStats();
-}
 
 // Update loadRangeStats to use new result div
 async function loadRangeStats() {
