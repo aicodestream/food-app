@@ -434,22 +434,14 @@ async function loadCustomerBilling() {
 // Load visitor statistics for dashboard cards
 async function loadVisitorStatsCards() {
     try {
-        // Get today's stats
-        const todayResponse = await fetch(`${API_URL}/stats/visitors/today`);
-        const todayStats = await todayResponse.json();
+        // For now, set to 0 until visitor tracking endpoints are fully implemented
+        document.getElementById('today-visitors').textContent = '0';
+        document.getElementById('today-pageviews').textContent = '0';
+        document.getElementById('total-visitors').textContent = '0';
         
-        // Get total stats
-        const totalResponse = await fetch(`${API_URL}/stats/visitors/total`);
-        const totalStats = await totalResponse.json();
-        
-        // Update UI
-        document.getElementById('today-visitors').textContent = todayStats.unique_visitors || 0;
-        document.getElementById('today-pageviews').textContent = todayStats.page_views || 0;
-        document.getElementById('total-visitors').textContent = totalStats.total_unique_visitors || 0;
-        
+        console.log('Visitor stats: Endpoints not yet implemented');
     } catch (error) {
         console.error('Error loading visitor stats:', error);
-        // Set to 0 if error
         document.getElementById('today-visitors').textContent = '0';
         document.getElementById('today-pageviews').textContent = '0';
         document.getElementById('total-visitors').textContent = '0';
