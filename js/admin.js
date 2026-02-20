@@ -309,17 +309,19 @@ async function loadRangeStats() {
         }
         
         const response = await fetch(`${API_URL}/stats/range?startDate=${startDate}&endDate=${endDate}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const stats = await response.json();
         
         const resultsDiv = document.getElementById('analytics-results');
         
-        if (stats.length === 0) {
+        if (!stats || stats.total_orders === 0) {
             resultsDiv.innerHTML = '<p style="text-align: center; color: #999;">No orders found in this date range</p>';
             return;
         }
-        
-        const totalRevenue = stats.reduce((sum, day) => sum + parseFloat(day.total_revenue), 0);
-        const totalOrders = stats.reduce((sum, day) => sum + day.total_orders, 0);
         
         resultsDiv.innerHTML = `
             <div class="analytics-card">
@@ -327,37 +329,37 @@ async function loadRangeStats() {
                 <div class="stats-grid">
                     <div class="stat-item">
                         <span class="stat-label">Total Orders:</span>
-                        <span class="stat-value">${totalOrders}</span>
+                        <span class="stat-value">${stats.total_orders || 0}</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Total Revenue:</span>
-                        <span class="stat-value">₹${totalRevenue.toFixed(2)}</span>
+                        <span class="stat-value">₹${stats.total_revenue || 0}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Average per Day:</span>
-                        <span class="stat-value">₹${(totalRevenue / stats.length).toFixed(2)}</span>
+                        <span class="stat-label">Average Order Value:</span>
+                        <span class="stat-value">₹${stats.avg_order_value ? parseFloat(stats.avg_order_value).toFixed(2) : 0}</span>
                     </div>
                 </div>
                 
-                <h4 style="margin-top: 2rem;">Daily Breakdown</h4>
-                <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Orders</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${stats.map(day => `
-                            <tr>
-                                <td>${day.date}</td>
-                                <td>${day.total_orders}</td>
-                                <td>₹${parseFloat(day.total_revenue).toFixed(2)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                <h4 style="margin-top: 2rem;">Orders by Status</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Pending:</span>
+                        <span class="stat-value">${stats.orders_by_status?.pending || 0}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Preparing:</span>
+                        <span class="stat-value">${stats.orders_by_status?.preparing || 0}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Out for Delivery:</span>
+                        <span class="stat-value">${stats.orders_by_status?.delivering || 0}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Delivered:</span>
+                        <span class="stat-value">${stats.orders_by_status?.delivered || 0}</span>
+                    </div>
+                </div>
             </div>
         `;
     } catch (error) {
