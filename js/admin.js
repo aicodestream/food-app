@@ -456,3 +456,295 @@ function adminLogout() {
         window.location.href = 'admin-login.html';
     }
 }
+
+
+// ==================== VISITOR ANALYTICS FUNCTIONS ====================
+
+// Load visitor stats for a date range
+async function loadVisitorStats() {
+    const startDate = document.getElementById('visitor-start-date').value;
+    const endDate = document.getElementById('visitor-end-date').value;
+    
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    
+    const resultsDiv = document.getElementById('visitor-analytics-results');
+    resultsDiv.innerHTML = '<p class="placeholder-text">Loading visitor statistics...</p>';
+    
+    try {
+        const response = await fetch(`${API_BASE}/visitor-tracking?startDate=${startDate}&endDate=${endDate}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load visitor stats');
+        }
+        
+        const data = await response.json();
+        displayVisitorStats(data, startDate, endDate);
+    } catch (error) {
+        console.error('Error loading visitor stats:', error);
+        resultsDiv.innerHTML = `<p class="placeholder-text" style="color: #e74c3c;">Error loading visitor statistics. Please try again.</p>`;
+    }
+}
+
+// Display visitor statistics
+function displayVisitorStats(data, startDate, endDate) {
+    const resultsDiv = document.getElementById('visitor-analytics-results');
+    
+    // Calculate totals
+    const totalVisitors = data.visitors || 0;
+    const totalPageViews = data.pageViews || 0;
+    const avgPageViewsPerVisitor = totalVisitors > 0 ? (totalPageViews / totalVisitors).toFixed(2) : 0;
+    const dateRange = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+    
+    let html = `
+        <div class="visitor-stats-grid">
+            <div class="visitor-stat-card">
+                <h4>👥 Total Visitors</h4>
+                <div class="stat-value">${totalVisitors}</div>
+                <div class="stat-label">${dateRange}</div>
+            </div>
+            <div class="visitor-stat-card">
+                <h4>📄 Total Page Views</h4>
+                <div class="stat-value">${totalPageViews}</div>
+                <div class="stat-label">${dateRange}</div>
+            </div>
+            <div class="visitor-stat-card">
+                <h4>📊 Avg Views/Visitor</h4>
+                <div class="stat-value">${avgPageViewsPerVisitor}</div>
+                <div class="stat-label">Pages per visitor</div>
+            </div>
+        </div>
+    `;
+    
+    // Add daily breakdown if available
+    if (data.dailyStats && data.dailyStats.length > 0) {
+        html += `
+            <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #333;">📅 Daily Breakdown</h4>
+            <table class="visitor-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Visitors</th>
+                        <th>Page Views</th>
+                        <th>Avg Views/Visitor</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        data.dailyStats.forEach(day => {
+            const avgViews = day.visitors > 0 ? (day.pageViews / day.visitors).toFixed(2) : 0;
+            html += `
+                <tr>
+                    <td>${formatDate(day.date)}</td>
+                    <td>${day.visitors}</td>
+                    <td>${day.pageViews}</td>
+                    <td>${avgViews}</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                </tbody>
+            </table>
+        `;
+    }
+    
+    resultsDiv.innerHTML = html;
+}
+
+// Quick filter functions for visitor stats
+function loadVisitorStatsToday() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('visitor-start-date').value = today;
+    document.getElementById('visitor-end-date').value = today;
+    loadVisitorStats();
+}
+
+function loadVisitorStatsYesterday() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    document.getElementById('visitor-start-date').value = yesterdayStr;
+    document.getElementById('visitor-end-date').value = yesterdayStr;
+    loadVisitorStats();
+}
+
+function loadVisitorStatsWeek() {
+    const today = new Date();
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    document.getElementById('visitor-start-date').value = weekAgo.toISOString().split('T')[0];
+    document.getElementById('visitor-end-date').value = today.toISOString().split('T')[0];
+    loadVisitorStats();
+}
+
+function loadVisitorStatsMonth() {
+    const today = new Date();
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    document.getElementById('visitor-start-date').value = monthAgo.toISOString().split('T')[0];
+    document.getElementById('visitor-end-date').value = today.toISOString().split('T')[0];
+    loadVisitorStats();
+}
+
+// Update loadRangeStats to use new result div
+async function loadRangeStats() {
+    const startDate = document.getElementById('order-start-date').value;
+    const endDate = document.getElementById('order-end-date').value;
+    
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    
+    const resultsDiv = document.getElementById('order-analytics-results');
+    resultsDiv.innerHTML = '<p class="placeholder-text">Loading order statistics...</p>';
+    
+    try {
+        const response = await fetch(`${API_BASE}/stats/range?startDate=${startDate}&endDate=${endDate}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load stats');
+        }
+        
+        const data = await response.json();
+        displayOrderStats(data, startDate, endDate);
+    } catch (error) {
+        console.error('Error loading range stats:', error);
+        resultsDiv.innerHTML = `<p class="placeholder-text" style="color: #e74c3c;">Error loading order statistics. Please try again.</p>`;
+    }
+}
+
+// Display order statistics
+function displayOrderStats(data, startDate, endDate) {
+    const resultsDiv = document.getElementById('order-analytics-results');
+    const dateRange = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+    
+    const html = `
+        <div class="order-stats-summary">
+            <h4>📦 Order Summary: ${dateRange}</h4>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">${data.total_orders || 0}</div>
+                    <div class="summary-label">Total Orders</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">₹${(data.total_revenue || 0).toFixed(2)}</div>
+                    <div class="summary-label">Total Revenue</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">₹${(data.average_order_value || 0).toFixed(2)}</div>
+                    <div class="summary-label">Avg Order Value</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">${data.unique_customers || 0}</div>
+                    <div class="summary-label">Unique Customers</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    resultsDiv.innerHTML = html;
+}
+
+// Update loadCustomerBilling to use new result div
+async function loadCustomerBilling() {
+    const resultsDiv = document.getElementById('customer-billing-results');
+    resultsDiv.innerHTML = '<p class="placeholder-text">Loading customer billing data...</p>';
+    
+    try {
+        const response = await fetch(`${API_BASE}/stats/customers`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load customer billing');
+        }
+        
+        const customers = await response.json();
+        displayCustomerBilling(customers);
+    } catch (error) {
+        console.error('Error loading customer billing:', error);
+        resultsDiv.innerHTML = `<p class="placeholder-text" style="color: #e74c3c;">Error loading customer billing data. Please try again.</p>`;
+    }
+}
+
+// Display customer billing
+function displayCustomerBilling(customers) {
+    const resultsDiv = document.getElementById('customer-billing-results');
+    
+    if (!customers || customers.length === 0) {
+        resultsDiv.innerHTML = '<p class="placeholder-text">No customer data available</p>';
+        return;
+    }
+    
+    let html = `
+        <table class="billing-table">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Total Orders</th>
+                    <th>Total Spent</th>
+                    <th>Avg Order Value</th>
+                    <th>Last Order</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    customers.forEach(customer => {
+        const avgOrderValue = customer.total_orders > 0 
+            ? (customer.total_spent / customer.total_orders).toFixed(2) 
+            : 0;
+        const lastOrderDate = customer.last_order 
+            ? new Date(customer.last_order).toLocaleDateString() 
+            : 'N/A';
+        
+        html += `
+            <tr>
+                <td>${customer.name || 'N/A'}</td>
+                <td>${customer.phone}</td>
+                <td>${customer.total_orders}</td>
+                <td class="amount">₹${customer.total_spent.toFixed(2)}</td>
+                <td>₹${avgOrderValue}</td>
+                <td>${lastOrderDate}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+            </tbody>
+        </table>
+    `;
+    
+    resultsDiv.innerHTML = html;
+}
+
+// Helper function to format dates
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+// Update loadDailyStats and loadYesterdayStats
+function loadDailyStats() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('order-start-date').value = today;
+    document.getElementById('order-end-date').value = today;
+    loadRangeStats();
+}
+
+function loadYesterdayStats() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    document.getElementById('order-start-date').value = yesterdayStr;
+    document.getElementById('order-end-date').value = yesterdayStr;
+    loadRangeStats();
+}

@@ -102,29 +102,71 @@
 
         <div id="analytics-tab" class="tab-content">
             <div class="analytics-section">
-                <h2>Analytics & Reports</h2>
+                <h2>📊 Analytics & Reports</h2>
                 
-                <div class="analytics-filters">
-                    <div class="filter-group">
-                        <label>Quick Stats</label>
-                        <button class="btn" onclick="loadDailyStats()">Today</button>
-                        <button class="btn" onclick="loadYesterdayStats()">Yesterday</button>
+                <!-- Visitor Analytics Section -->
+                <div class="analytics-card">
+                    <h3>👥 Visitor Analytics</h3>
+                    <div class="analytics-filters">
+                        <div class="filter-group">
+                            <label>Select Date Range</label>
+                            <input type="date" id="visitor-start-date" class="date-input">
+                            <span style="margin: 0 0.5rem;">to</span>
+                            <input type="date" id="visitor-end-date" class="date-input">
+                            <button class="btn btn-primary" onclick="loadVisitorStats()">📈 Load Visitor Stats</button>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Quick Filters</label>
+                            <button class="btn btn-secondary" onclick="loadVisitorStatsToday()">Today</button>
+                            <button class="btn btn-secondary" onclick="loadVisitorStatsYesterday()">Yesterday</button>
+                            <button class="btn btn-secondary" onclick="loadVisitorStatsWeek()">Last 7 Days</button>
+                            <button class="btn btn-secondary" onclick="loadVisitorStatsMonth()">Last 30 Days</button>
+                        </div>
                     </div>
                     
-                    <div class="filter-group">
-                        <label>Date Range</label>
-                        <input type="date" id="start-date">
-                        <input type="date" id="end-date">
-                        <button class="btn" onclick="loadRangeStats()">Load Range</button>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label>Customer Billing</label>
-                        <button class="btn" onclick="loadCustomerBilling()">Load Customers</button>
+                    <div id="visitor-analytics-results" class="analytics-results">
+                        <p class="placeholder-text">Select a date range to view visitor statistics</p>
                     </div>
                 </div>
-
-                <div id="analytics-results"></div>
+                
+                <!-- Order Analytics Section -->
+                <div class="analytics-card">
+                    <h3>📦 Order Analytics</h3>
+                    <div class="analytics-filters">
+                        <div class="filter-group">
+                            <label>Date Range</label>
+                            <input type="date" id="order-start-date" class="date-input">
+                            <span style="margin: 0 0.5rem;">to</span>
+                            <input type="date" id="order-end-date" class="date-input">
+                            <button class="btn btn-primary" onclick="loadRangeStats()">📊 Load Order Stats</button>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Quick Stats</label>
+                            <button class="btn btn-secondary" onclick="loadDailyStats()">Today</button>
+                            <button class="btn btn-secondary" onclick="loadYesterdayStats()">Yesterday</button>
+                        </div>
+                    </div>
+                    
+                    <div id="order-analytics-results" class="analytics-results">
+                        <p class="placeholder-text">Select a date range to view order statistics</p>
+                    </div>
+                </div>
+                
+                <!-- Customer Billing Section -->
+                <div class="analytics-card">
+                    <h3>💰 Customer Billing</h3>
+                    <div class="analytics-filters">
+                        <div class="filter-group">
+                            <button class="btn btn-primary" onclick="loadCustomerBilling()">👥 Load All Customers</button>
+                        </div>
+                    </div>
+                    
+                    <div id="customer-billing-results" class="analytics-results">
+                        <p class="placeholder-text">Click to load customer billing data</p>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
