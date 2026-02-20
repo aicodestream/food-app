@@ -1068,3 +1068,325 @@ html {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* Enhanced Mobile Responsive Styles for Analytics */
+@media (max-width: 768px) {
+    header {
+        padding: 1.5rem 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    header h1 img {
+        height: 40px !important;
+        margin: 0 !important;
+    }
+    
+    main {
+        padding: 0 1rem;
+        margin: 1rem auto;
+    }
+    
+    .tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 0.85rem;
+    }
+    
+    .stat-card p {
+        font-size: 1.5rem;
+    }
+    
+    /* Analytics Cards Mobile */
+    .analytics-card {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .analytics-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .analytics-filters {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+        gap: 0.75rem;
+    }
+    
+    .filter-group label {
+        font-size: 0.85rem;
+    }
+    
+    .date-input {
+        padding: 0.75rem;
+        font-size: 16px; /* Prevent iOS zoom */
+        width: 100%;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        padding: 0.85rem;
+        font-size: 0.95rem;
+        text-align: center;
+    }
+    
+    /* Visitor Stats Grid Mobile */
+    .visitor-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .visitor-stat-card {
+        padding: 1.25rem;
+    }
+    
+    .visitor-stat-card .stat-value {
+        font-size: 2rem;
+    }
+    
+    /* Tables Mobile - Card Style */
+    .visitor-table,
+    .billing-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        font-size: 0.85rem;
+    }
+    
+    .visitor-table thead,
+    .billing-table thead {
+        display: none;
+    }
+    
+    .visitor-table tbody,
+    .billing-table tbody {
+        display: block;
+    }
+    
+    .visitor-table tr,
+    .billing-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .visitor-table td,
+    .billing-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .visitor-table td:last-child,
+    .billing-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .visitor-table td::before,
+    .billing-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #666;
+        flex: 0 0 40%;
+    }
+    
+    /* Order Stats Summary Mobile */
+    .order-stats-summary {
+        padding: 1.5rem 1rem;
+    }
+    
+    .order-stats-summary h4 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .order-stats-summary .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .order-stats-summary .summary-value {
+        font-size: 1.5rem;
+    }
+    
+    .order-stats-summary .summary-label {
+        font-size: 0.8rem;
+    }
+    
+    /* Analytics Results Mobile */
+    .analytics-results {
+        padding: 1rem;
+        min-height: 150px;
+    }
+    
+    .placeholder-text {
+        font-size: 0.95rem;
+        padding: 2rem 1rem;
+    }
+    
+    /* Orders Section Mobile */
+    .orders-section {
+        padding: 1rem;
+    }
+    
+    .orders-section h2 {
+        font-size: 1.3rem;
+    }
+    
+    .order-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .order-id {
+        font-size: 1rem;
+    }
+    
+    .order-status {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .order-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    
+    .order-actions select,
+    .order-actions button {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Small Mobile (320px - 480px) */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: 0.85rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 0.8rem;
+    }
+    
+    .stat-card p {
+        font-size: 1.3rem;
+    }
+    
+    .analytics-card h3 {
+        font-size: 1.1rem;
+    }
+    
+    .visitor-stat-card .stat-value {
+        font-size: 1.75rem;
+    }
+    
+    .order-stats-summary .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .order-stats-summary .summary-value {
+        font-size: 1.3rem;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Landscape Mode Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    header {
+        padding: 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .visitor-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn-primary,
+    .btn-secondary,
+    .tab-btn,
+    button,
+    select {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .stat-card {
+        min-height: 100px;
+    }
+}
+
+/* Prevent text selection on interactive elements */
+.tab-btn,
+.btn-primary,
+.btn-secondary,
+.stat-card {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}

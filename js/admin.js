@@ -1,5 +1,6 @@
 // API endpoint
 const API_URL = 'https://api.aicodestreams.com';
+const API_BASE = API_URL; // Alias for compatibility
 
 // In-memory orders (for testing without backend)
 let orders = [];
@@ -8,9 +9,9 @@ let currentFilter = 'all'; // Track current filter
 // Load orders on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadOrders();
-    loadVisitorStats();
+    loadVisitorStatsCards();
     setInterval(loadOrders, 30000); // Auto-refresh every 30 seconds
-    setInterval(loadVisitorStats, 60000); // Refresh visitor stats every minute
+    setInterval(loadVisitorStatsCards, 60000); // Refresh visitor stats every minute
 });
 
 // Load orders from backend or localStorage
@@ -430,8 +431,8 @@ async function loadCustomerBilling() {
 }
 
 
-// Load visitor statistics
-async function loadVisitorStats() {
+// Load visitor statistics for dashboard cards
+async function loadVisitorStatsCards() {
     try {
         // Get today's stats
         const todayResponse = await fetch(`${API_URL}/stats/visitors/today`);
@@ -448,6 +449,10 @@ async function loadVisitorStats() {
         
     } catch (error) {
         console.error('Error loading visitor stats:', error);
+        // Set to 0 if error
+        document.getElementById('today-visitors').textContent = '0';
+        document.getElementById('today-pageviews').textContent = '0';
+        document.getElementById('total-visitors').textContent = '0';
     }
 }
 
