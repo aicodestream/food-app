@@ -303,10 +303,14 @@ async function loadRangeStats() {
         const startDate = document.getElementById('start-date').value;
         const endDate = document.getElementById('end-date').value;
         
+        const resultsDiv = document.getElementById('analytics-results');
+        
         if (!startDate || !endDate) {
-            alert('Please select both start and end dates');
+            resultsDiv.innerHTML = '<p class="placeholder-text" style="color: #e74c3c;">⚠️ Please select both start and end dates</p>';
             return;
         }
+        
+        resultsDiv.innerHTML = '<p class="placeholder-text">Loading statistics...</p>';
         
         const response = await fetch(`${API_URL}/stats/range?startDate=${startDate}&endDate=${endDate}`);
         
@@ -465,12 +469,13 @@ async function loadVisitorStats() {
     const startDate = document.getElementById('visitor-start-date').value;
     const endDate = document.getElementById('visitor-end-date').value;
     
+    const resultsDiv = document.getElementById('visitor-analytics-results');
+    
     if (!startDate || !endDate) {
-        alert('Please select both start and end dates');
+        resultsDiv.innerHTML = '<p class="placeholder-text" style="color: #e74c3c;">⚠️ Please select both start and end dates</p>';
         return;
     }
     
-    const resultsDiv = document.getElementById('visitor-analytics-results');
     resultsDiv.innerHTML = '<p class="placeholder-text">Loading visitor statistics...</p>';
     
     try {
@@ -595,12 +600,13 @@ async function loadRangeStats() {
     const startDate = document.getElementById('order-start-date').value;
     const endDate = document.getElementById('order-end-date').value;
     
+    const resultsDiv = document.getElementById('order-analytics-results');
+    
     if (!startDate || !endDate) {
-        alert('Please select both start and end dates');
+        resultsDiv.innerHTML = '<p class="placeholder-text" style="color: #e74c3c;">⚠️ Please select both start and end dates</p>';
         return;
     }
     
-    const resultsDiv = document.getElementById('order-analytics-results');
     resultsDiv.innerHTML = '<p class="placeholder-text">Loading order statistics...</p>';
     
     try {
