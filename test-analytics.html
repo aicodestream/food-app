@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Analytics Endpoints</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #e55a2b;
+        }
+        .result {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #ff6b35;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            border-left-color: #4caf50;
+        }
+        .error {
+            border-left-color: #f44336;
+        }
+        h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Analytics Endpoints Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Test /stats/range</h2>
+        <button onclick="testStatsRange()">Test Stats Range</button>
+        <div id="range-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test /stats/customers</h2>
+        <button onclick="testStatsCustomers()">Test Stats Customers</button>
+        <div id="customers-result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.aicodestreams.com';
+
+        async function testStatsRange() {
+            const resultDiv = document.getElementById('range-result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                const startDate = '2026-02-01';
+                const endDate = '2026-02-28';
+                const url = `${API_URL}/stats/range?startDate=${startDate}&endDate=${endDate}`;
+                
+                console.log('Fetching:', url);
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data:', data);
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <strong>✅ SUCCESS</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ ERROR</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testStatsCustomers() {
+            const resultDiv = document.getElementById('customers-result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                const url = `${API_URL}/stats/customers`;
+                
+                console.log('Fetching:', url);
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data:', data);
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <strong>✅ SUCCESS</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ ERROR</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
